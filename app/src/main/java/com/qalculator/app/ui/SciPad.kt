@@ -252,11 +252,22 @@ private fun SciKeyRound(key: SciKey, fontSp: Float, modifier: Modifier, fg: Colo
         pressedScale = 0.94f,
         modifier = modifier.background(bg, CircleShape)
     ) {
-        BasicText(
-            text = text,
-            style = qStylePx(size, 600, fg, lh = 1.2f, align = TextAlign.Center),
-            maxLines = 1,
-            softWrap = false
-        )
+        if (key.code == "2nd") {
+            // alternative function key: the option (⌥) icon (green circle while the 2nd functions are on)
+            SvgIcon(SWAP_ICON, fg, Modifier.size((fontSp * 0.95f).dp))
+        } else {
+            BasicText(
+                text = text,
+                style = qStylePx(size, 600, fg, lh = 1.2f, align = TextAlign.Center),
+                maxLines = 1,
+                softWrap = false
+            )
+        }
     }
 }
+
+/** the option sign (the ⌥ sign): switch the keys to their alternative functions (sin to sin-1, lg to 10^x ...) */
+private val SWAP_ICON = IconDef(
+    listOf("M3 6h5l8 12h5", "M14 6h7"),
+    2.2f
+)
