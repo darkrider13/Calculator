@@ -15,7 +15,7 @@ sealed class Seg {
 /** what the screen shows (the DOM of the original): top line, big result, and the plain number for copy */
 data class CalcView(
     val top: List<Seg> = emptyList(),
-    val out: String = "0",
+    val out: String = "",
     val raw: String = "",
     /** counts the renders (every renderCalc call), so the screen can scroll to the end each time */
     val seq: Int = 0
@@ -192,7 +192,7 @@ fun renderCalc(s: CalcState): CalcState {
         }
     } else {
         top = emptyList()
-        out = if (e == "") "0" else e.replace('*', '×').replace('/', '÷').replace('-', '−')
+        out = if (e == "") "" else e.replace('*', '×').replace('/', '÷').replace('-', '−')
         raw = if (PLAIN_NUM_RE.matches(e)) DOT_END_RE.replace(e, "") else ""
     }
     var r = s.copy(view = CalcView(top, out, raw, s.view.seq + 1))
