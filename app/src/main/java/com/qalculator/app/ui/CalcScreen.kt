@@ -82,7 +82,7 @@ import kotlinx.coroutines.delay
 private const val ROW_DP = 36f
 
 @Composable
-fun CalcScreen(ctl: CalcController, modifier: Modifier = Modifier) {
+fun CalcScreen(ctl: CalcController, onConvert: () -> Unit = {}, modifier: Modifier = Modifier) {
     val overlays = LocalOverlays.current
     // Escape / back: the verify sheet closes first, then the history sheet (not while a popup is open)
     BackHandler(enabled = ctl.verify != null && !overlays.anyOpen) { ctl.vBack() }
@@ -94,7 +94,7 @@ fun CalcScreen(ctl: CalcController, modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .graphicsLayer { alpha = if (ctl.sheetOpen) 0f else 1f }
         ) {
-            CalcMain(ctl, Modifier.fillMaxSize())
+            CalcMain(ctl, onConvert, Modifier.fillMaxSize())
         }
         if (ctl.sheetOpen) {
             Box(
@@ -110,7 +110,7 @@ fun CalcScreen(ctl: CalcController, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun CalcMain(ctl: CalcController, modifier: Modifier) {
+private fun CalcMain(ctl: CalcController, onConvert: () -> Unit, modifier: Modifier) {
     val vh = LocalViewportH.current.value
     BoxWithConstraints(modifier = modifier) {
         // NEW DESIGN: round keys, no display card. Measurements come from the reference picture (px / 2 = dp).
@@ -129,7 +129,7 @@ private fun CalcMain(ctl: CalcController, modifier: Modifier) {
 
         Column(modifier = Modifier.fillMaxSize()) {
             CalcDisplay(ctl, Modifier.weight(1f), vh)
-            IconRow(ctl)
+            IconRow(ctl, onConvert)
             Spacer(Modifier.height(12.dp))
             Box(
                 modifier = Modifier
@@ -161,7 +161,7 @@ private fun CalcDisplay(ctl: CalcController, modifier: Modifier, vh: Float) {
 
 /** the small icon row under the display: history, ruler (convert, later), scientific (later), backspace */
 @Composable
-private fun IconRow(ctl: CalcController) {
+private fun IconRow(ctl: CalcController, onConvert: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -178,9 +178,9 @@ private fun IconRow(ctl: CalcController) {
             SvgIcon(Icons.Clock, Q.IconGray, Modifier.size(24.dp))
         }
         Spacer(Modifier.width(9.dp))
-        // ruler: the place for the convert button (the price screen will be connected here later)
+        // ruler: the convert button, opens the convert options page
         PressBox(
-            onClick = { /* TODO: convert button -> price screen */ },
+            onClick = onConvert,
             pressedScale = 0.92f,
             modifier = Modifier.size(48.dp)
         ) {
