@@ -33,6 +33,7 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.qalculator.app.ui.FLOAT_HEADER_DP
+import com.qalculator.app.ui.FLOAT_TALL_DP
 import com.qalculator.app.ui.FLOAT_W_DP
 import com.qalculator.app.ui.FloatCalc
 
@@ -139,6 +140,7 @@ private class DragFrame(
 class FloatService : Service() {
     private var wm: WindowManager? = null
     private var root: DragFrame? = null
+    private var params: WindowManager.LayoutParams? = null
     private val owner = OverlayOwner()
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -217,7 +219,8 @@ class FloatService : Service() {
                     startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                     stopSelf()
                 },
-                onClose = { stopSelf() }
+                onClose = { stopSelf() },
+                onAnimating = { setTall(it) }
             )
         }
         frame.addView(cv)
@@ -227,6 +230,22 @@ class FloatService : Service() {
         manager.addView(frame, lp)
         wm = manager
         root = frame
+        params = lp
+    }
+
+    /** true: a fixed tall window (while the keys animate); false: the window wraps the content again */
+    private fun setTall(tall: Boolean) {
+        val r = root ?: return
+        val lp = params ?: return
+        val h = if (tall) (FLOAT_TALL_DP * resources.displayMetrics.density).toInt()
+        else WindowManager.LayoutParams.WRAP_CONTENT
+        if (lp.height == h) return
+        lp.height = h
+        try {
+            wm?.updateViewLayout(r, lp)
+        } catch (x: Exception) {
+            // the window is already gone
+        }
     }
 
     override fun onDestroy() {
