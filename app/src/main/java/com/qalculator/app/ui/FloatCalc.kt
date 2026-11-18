@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -74,6 +75,8 @@ fun FloatCalc(ctl: CalcController, onOpenApp: () -> Unit, onClose: () -> Unit, o
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                // the tall window gives min height = window height: without this the card itself became tall (the gap)
+                .wrapContentHeight(Alignment.Top)
                 .onSizeChanged { contentH = it.height }
                 .clip(shape)
                 .background(Color(0xF2000000))
