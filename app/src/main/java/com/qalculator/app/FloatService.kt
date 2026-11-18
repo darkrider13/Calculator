@@ -220,7 +220,7 @@ class FloatService : Service() {
                     stopSelf()
                 },
                 onClose = { stopSelf() },
-                onAnimating = { setTall(it) }
+                onAnimating = { tall, h -> setTall(tall, h) }
             )
         }
         frame.addView(cv)
@@ -233,11 +233,12 @@ class FloatService : Service() {
         params = lp
     }
 
-    /** true: a fixed tall window (while the keys animate); false: the window wraps the content again */
-    private fun setTall(tall: Boolean) {
+    /** true: a fixed tall window (while the keys animate); false: the window gets exactly the content height (no jump) */
+    private fun setTall(tall: Boolean, contentPx: Int) {
         val r = root ?: return
         val lp = params ?: return
         val h = if (tall) (FLOAT_TALL_DP * resources.displayMetrics.density).toInt()
+        else if (contentPx > 0) contentPx
         else WindowManager.LayoutParams.WRAP_CONTENT
         if (lp.height == h) return
         lp.height = h
