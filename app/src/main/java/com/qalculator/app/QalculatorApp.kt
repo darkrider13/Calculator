@@ -43,9 +43,6 @@ import com.qalculator.app.ui.pageBackground
 fun QalculatorApp(state: AppState) {
     val overlays = remember { Overlays() }
     val calcCtl = remember { CalcController(state) }
-    val priceCtl = remember { PriceController(state) }
-    var tab by remember { mutableStateOf("calc") }
-    var splashDone by remember { mutableStateOf(false) }
     // CSS px never follow the phone's font-size setting (the old WebView app ignored it too), so sp == dp here:
     // this keeps every fixed-height row from overlapping when the system font size is large
     val dens = LocalDensity.current
@@ -69,42 +66,21 @@ fun QalculatorApp(state: AppState) {
                     LocalViewportH provides maxHeight
                 ) {
                     OverlayHost(overlays) {
-                        // body: padding 16px / 12px (6px on short screens), .app: max 460 wide, gap 10 (6)
+                        // plain black page (no glow), no tab bar (price screen is hidden for now), max 460 wide
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .pageBackground()
-                                .padding(horizontal = 16.dp, vertical = if (compact) 6.dp else 12.dp)
+                                .background(Color.Black)
                         ) {
-                            Column(
+                            CalcScreen(
+                                ctl = calcCtl,
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
                                     .fillMaxHeight()
                                     .widthIn(max = 460.dp)
-                                    .fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp)
-                            ) {
-                                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                                    if (tab == "calc") {
-                                        CalcScreen(
-                                            ctl = calcCtl,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-                                    if (tab == "price") {
-                                        PriceScreen(ctl = priceCtl, modifier = Modifier.fillMaxSize())
-                                    }
-                                }
-                                TabBar(
-                                    items = listOf(SegItem("calc", "ক্যালকুলেটর"), SegItem("price", "দাম হিসাব")),
-                                    selected = tab,
-                                    onSelect = { calcCtl.closeSheet(); tab = it }
-                                )
-                            }
+                                    .fillMaxWidth()
+                            )
                         }
-                    }
-                    if (!splashDone) {
-                        SplashOverlay(onFinished = { splashDone = true })
                     }
                 }
             }
