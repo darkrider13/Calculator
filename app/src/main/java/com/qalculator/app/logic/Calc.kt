@@ -50,6 +50,45 @@ fun compute(rpS: String, rwS: String, ruS: String, wS: String, wuS: String, amtS
 
 class ExprError(msg: String) : Exception(msg)
 
+/** the function names of the scientific keys (the expression text has them as "sin(" etc.) */
+internal const val FN_SRC = "a?(?:sin|cos|tan)ʳ?|lg|ln|√"
+private val FN_NAMES = setOf("sin", "cos", "tan", "asin", "acos", "atan", "lg", "ln", "√")
+
+/** any character that only a scientific key can put into the expression */
+private val SCI_RE = Regex("[a-zπ!²¹^√]")
+
+fun isSci(t: String): Boolean = SCI_RE.containsMatchIn(t)
+
+private fun factorial(v: Double): Double {
+    if (v.isNaN() || v < 0 || Math.abs(v - Math.rint(v)) > 1e-9) return Double.NaN
+    val n = Math.rint(v).toInt()
+    if (n > 170) return Double.POSITIVE_INFINITY
+    var r = 1.0
+    for (k in 2..n) r *= k
+    return r
+}
+
+/** one function applied to a; trig works in degrees unless rad */
+private fun applyFn(name: String, a: Double, rad: Boolean): Double {
+    fun ang(x: Double) = if (rad) x else Math.toRadians(x)
+    fun back(x: Double) = if (rad) x else Math.toDegrees(x)
+    return when (name) {
+        "sin" -> Math.sin(ang(a))
+        "cos" -> Math.cos(ang(a))
+        "tan" -> {
+            if (!rad && Math.abs(((a % 180.0) + 180.0) % 180.0 - 90.0) < 1e-9) Double.NaN
+            else Math.tan(ang(a))
+        }
+        "asin" -> if (a < -1.0 || a > 1.0) Double.NaN else back(Math.asin(a))
+        "acos" -> if (a < -1.0 || a > 1.0) Double.NaN else back(Math.acos(a))
+        "atan" -> back(Math.atan(a))
+        "lg" -> if (a <= 0.0) Double.NaN else Math.log10(a)
+        "ln" -> if (a <= 0.0) Double.NaN else Math.log(a)
+        "√" -> if (a < 0.0) Double.NaN else Math.sqrt(a)
+        else -> Double.NaN
+    }
+}
+
 private class Evaluator(private val s: String) {
     var i = 0
     private var isPct = false
@@ -72,12 +111,10 @@ private class Evaluator(private val s: String) {
         return v
     }
 
-    private fun factor(): Double {
-        if (at(i) == '-') {
-            i++
-            return -factor()
-        }
-        if (at(i) == '(') {
+    /** one value: a bracket, a constant (π, e), a function call (sin(...)) or a number */
+    private fun atom(): Double {
+        val c = at(i)
+        if (c == '(') {
             i++
             val pv = expr()
             if (at(i) == ')') i++
@@ -90,7 +127,86 @@ private class Evaluator(private val s: String) {
             isPct = false
             return pv
         }
+        if (c == 'π') {
+            i++
+            isPct = false
+            return Math.PI
+        }
+        if (c == 'e') {
+            i++
+            isPct = false
+            return Math.E
+        }
+        if ((c in 'a'..'z') || c == '√') return call()
         return num()
+    }
+
+    /** sin( cos( tan( asin( acos( atan( lg( ln( √( ; a trailing ʳ means radians */
+    private fun call(): Double {
+        var j = i
+        val name: String
+        if (s[j] == '√') {
+            j++
+            name = "√"
+        } else {
+            while (j < s.length && s[j] in 'a'..'z') j++
+            name = s.substring(i, j)
+        }
+        var rad = false
+        if (j < s.length && s[j] == 'ʳ') {
+            rad = true
+            j++
+        }
+        if (j >= s.length || s[j] != '(') throw ExprError("fn")
+        if (name !in FN_NAMES) throw ExprError("fn")
+        i = j + 1
+        val a = expr()
+        if (at(i) == ')') i++
+        else if (i < s.length) throw ExprError("paren")
+        isPct = false
+        return applyFn(name, a, rad)
+    }
+
+    /** a value followed by any number of ! ² ⁻¹ */
+    private fun postfix(): Double {
+        var v = atom()
+        while (true) {
+            val c = at(i)
+            if (c == '!') {
+                i++
+                v = factorial(v)
+                isPct = false
+            } else if (c == '²') {
+                i++
+                v *= v
+                isPct = false
+            } else if (c == '⁻' && at(i + 1) == '¹') {
+                i += 2
+                v = 1.0 / v
+                isPct = false
+            } else break
+        }
+        return v
+    }
+
+    /** x^y, right to left: 2^3^2 = 2^(3^2) */
+    private fun power(): Double {
+        val b = postfix()
+        if (at(i) == '^') {
+            i++
+            val x = factor()
+            isPct = false
+            return Math.pow(b, x)
+        }
+        return b
+    }
+
+    private fun factor(): Double {
+        if (at(i) == '-') {
+            i++
+            return -factor()
+        }
+        return power()
     }
 
     private fun term(): Double {
@@ -134,11 +250,11 @@ fun evalOrNaN(s: String): Double = try {
 
 // ---------------------------------------------------------------- expression text helpers
 
-private val TRIM_TAIL_RE = Regex("[+\\-*/.(]+\\z")
-private val OP_ANY_RE = Regex("[+*/\\-]")
+private val TRIM_TAIL_RE = Regex("(?:[+\\-*/^.]|(?:$FN_SRC)?\\()+\\z")
+private val OP_ANY_RE = Regex("[+*/\\-^]")
 private val NUM_TOK_RE = Regex("[0-9]+\\.?[0-9]*|\\.[0-9]+")
 private val NORM_RE = Regex("^([0-9]+\\.?[0-9]*|\\.[0-9]+)\\z")
-private val TRAIL_OPS_RE = Regex("[+\\-*/]+\\z")
+private val TRAIL_OPS_RE = Regex("[+\\-*/^]+\\z")
 private val LEAD_ZEROS_RE = Regex("^0+(?=[0-9])")
 
 fun trimTail(e: String): String = TRIM_TAIL_RE.replace(e, "")
@@ -149,7 +265,7 @@ fun closeParens(t: String): String {
     return if (o > c) t + ")".repeat(o - c) else t
 }
 
-fun hasOp(t: String): Boolean = OP_ANY_RE.containsMatchIn(t.drop(1)) || t.endsWith("%")
+fun hasOp(t: String): Boolean = OP_ANY_RE.containsMatchIn(t.drop(1)) || t.endsWith("%") || isSci(t)
 
 /** start (s) and end (e, exclusive) of one number inside an expression */
 data class NumTok(val s: Int, val e: Int)
@@ -172,11 +288,11 @@ fun stripLead(v: String, p: Int): Pair<String, Int> {
     return if (z > 0) Pair(v.substring(z), Math.max(0, p - z)) else Pair(v, p)
 }
 
-private val TIDY_1 = Regex("\\(\\)%?")
-private val TIDY_2 = Regex("\\(([+*/])")
-private val TIDY_3 = Regex("[+\\-*/]\\)")
-private val TIDY_4 = Regex("[+\\-*/]([+*/])")
-private val TIDY_5 = Regex("^[+*/]+")
+private val TIDY_1 = Regex("(?:$FN_SRC)?\\(\\)%?")
+private val TIDY_2 = Regex("\\(([+*/^])")
+private val TIDY_3 = Regex("[+\\-*/^]\\)")
+private val TIDY_4 = Regex("[+\\-*/^]([+*/^])")
+private val TIDY_5 = Regex("^[+*/^]+")
 
 /** clean up leftovers after a number is taken out: (), "(+", "+)", "++" */
 fun tidyExpr(s0: String): String {
