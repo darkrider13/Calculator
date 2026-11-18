@@ -10,9 +10,11 @@
         <item name="android:forceDarkAllowed">false</item>
     </style>
 
-    <!-- launch theme: black background + the app's own launcher icon (system default), then straight into the app -->
+    <!-- launch theme: plain black screen (no icon: some phones, like Android 9 ones, showed the default android robot), then straight into the app -->
     <style name="AppTheme.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#000000</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_empty</item>
+        <item name="windowSplashScreenIconBackgroundColor">#000000</item>
         <item name="postSplashScreenTheme">@style/AppTheme</item>
         <item name="android:statusBarColor">#000000</item>
         <item name="android:navigationBarColor">#000000</item>
