@@ -17,11 +17,16 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
@@ -45,22 +50,31 @@ private val IcOpen = IconDef(listOf("M14 4h6v6", "M20 4l-7 7", "M10 20H4v-6", "M
 private val IcClose = IconDef(listOf("M6 6l12 12", "M18 6L6 18"), 2f)
 
 @Composable
-fun FloatCalc(ctl: CalcController, onOpenApp: () -> Unit, onClose: () -> Unit, onAnimating: (Boolean) -> Unit) {
+fun FloatCalc(ctl: CalcController, onOpenApp: () -> Unit, onClose: () -> Unit, onAnimating: (Boolean, Int) -> Unit) {
     val dens = LocalDensity.current
     // sp == dp, like in the app
     val fixed = remember(dens.density) { Density(dens.density, 1f) }
     // the window itself must not change its size on every frame of the key animation (that is what made it
     // jump and stutter): it gets a fixed tall size while the keys move, and wraps the content again after
+    // the content height in px (the window gets exactly this height after the animation, so nothing jumps)
+    var contentH by remember { mutableIntStateOf(0) }
+    // the first run (when the window opens) must not touch the window size at all: only a real toggle does
+    var first by remember { mutableStateOf(true) }
     LaunchedEffect(ctl.sciOpen) {
-        onAnimating(true)
+        if (first) {
+            first = false
+            return@LaunchedEffect
+        }
+        onAnimating(true, 0)
         delay(480)
-        onAnimating(false)
+        onAnimating(false, contentH)
     }
     CompositionLocalProvider(LocalDensity provides fixed) {
         val shape = RoundedCornerShape(22.dp)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .onSizeChanged { contentH = it.height }
                 .clip(shape)
                 .background(Color(0xF2000000))
                 .border(1.dp, Q.Divider, shape)
