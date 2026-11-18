@@ -1,4 +1,4 @@
-package com.bazarhisab.app
+package com.qalculator.app
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,18 +25,18 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
-import com.bazarhisab.app.ui.CalcController
-import com.bazarhisab.app.ui.CalcScreen
-import com.bazarhisab.app.ui.LocalCompact
-import com.bazarhisab.app.ui.LocalViewportH
-import com.bazarhisab.app.ui.PriceController
-import com.bazarhisab.app.ui.PriceScreen
-import com.bazarhisab.app.ui.SegItem
-import com.bazarhisab.app.ui.TabBar
-import com.bazarhisab.app.ui.LocalOverlays
-import com.bazarhisab.app.ui.OverlayHost
-import com.bazarhisab.app.ui.Overlays
-import com.bazarhisab.app.ui.pageBackground
+import com.qalculator.app.ui.CalcController
+import com.qalculator.app.ui.CalcScreen
+import com.qalculator.app.ui.LocalCompact
+import com.qalculator.app.ui.LocalViewportH
+import com.qalculator.app.ui.PriceController
+import com.qalculator.app.ui.PriceScreen
+import com.qalculator.app.ui.SegItem
+import com.qalculator.app.ui.TabBar
+import com.qalculator.app.ui.LocalOverlays
+import com.qalculator.app.ui.OverlayHost
+import com.qalculator.app.ui.Overlays
+import com.qalculator.app.ui.pageBackground
 
 /** Root of the app. Later steps put the calculator / price screens here. */
 @Composable

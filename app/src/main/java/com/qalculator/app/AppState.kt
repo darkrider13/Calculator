@@ -1,4 +1,4 @@
-package com.bazarhisab.app
+package com.qalculator.app
 
 import android.content.Context
 import android.os.Handler
@@ -6,12 +6,12 @@ import android.os.Looper
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.bazarhisab.app.logic.CalcEntry
-import com.bazarhisab.app.logic.Form
-import com.bazarhisab.app.logic.HistEntry
-import com.bazarhisab.app.logic.STORAGE_KEY
-import com.bazarhisab.app.logic.loadState
-import com.bazarhisab.app.logic.serializeState
+import com.qalculator.app.logic.CalcEntry
+import com.qalculator.app.logic.Form
+import com.qalculator.app.logic.HistEntry
+import com.qalculator.app.logic.STORAGE_KEY
+import com.qalculator.app.logic.loadState
+import com.qalculator.app.logic.serializeState
 
 /**
  * The saved data (price form, price history, calculator history).

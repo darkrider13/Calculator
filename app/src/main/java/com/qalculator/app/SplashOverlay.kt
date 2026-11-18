@@ -1,4 +1,4 @@
-package com.bazarhisab.app
+package com.qalculator.app
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing

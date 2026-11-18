@@ -1,4 +1,4 @@
-package com.bazarhisab.app
+package com.qalculator.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
