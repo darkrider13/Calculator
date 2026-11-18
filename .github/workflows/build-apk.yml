@@ -34,9 +34,9 @@ jobs:
       - name: Build APK
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'qalculator' }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'qalculator' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'qalculator' }}
         run: gradle assembleRelease --stacktrace
 
       - name: Rename APK
