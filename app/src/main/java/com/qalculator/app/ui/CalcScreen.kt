@@ -121,6 +121,7 @@ private fun CalcMain(ctl: CalcController, onConvert: () -> Unit, modifier: Modif
         val belowIcons = 12.dp + 1.dp + 31.dp // space + divider + space
         val bottomMargin = 15.dp
         val minDisplay = 96.dp
+        val gridW = maxWidth
         val byWidth = (maxWidth - sideMargin * 2 - gapX * 3) / 4
         val keysMax = maxHeight - minDisplay - iconRowH - belowIcons - bottomMargin
         val byHeight = (keysMax - gapY * 4) / 5
@@ -143,7 +144,7 @@ private fun CalcMain(ctl: CalcController, onConvert: () -> Unit, modifier: Modif
                     .background(Q.Divider)
             )
             Spacer(Modifier.height(31.dp))
-            CalcKeyPad(ctl, gapX, gapY, d, d5, keyFont, maxWidth)
+            CalcKeyPad(ctl, gapX, gapY, d, d5, keyFont, gridW)
             Spacer(Modifier.height(bottomMargin))
         }
     }
