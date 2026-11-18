@@ -17,23 +17,26 @@ android {
         versionName = "2.0.0"
     }
 
-    // one fixed key for every build, so a new APK always updates the old one (no uninstall needed)
+    // key comes from GitHub Secrets (see workflow); same key every build so new APK updates the old app
+    val ksFile = System.getenv("KEYSTORE_FILE")
     signingConfigs {
-        create("fixed") {
-            storeFile = file("qalculator.keystore")
-            storePassword = "qalculator"
-            keyAlias = "qalculator"
-            keyPassword = "qalculator"
+        if (ksFile != null) {
+            create("fixed") {
+                storeFile = file(ksFile)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
         }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("fixed")
+            signingConfigs.findByName("fixed")?.let { signingConfig = it }
         }
         debug {
-            signingConfig = signingConfigs.getByName("fixed")
+            signingConfigs.findByName("fixed")?.let { signingConfig = it }
         }
     }
 
