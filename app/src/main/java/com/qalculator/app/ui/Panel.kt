@@ -1,4 +1,4 @@
-package com.bazarhisab.app.ui
+package com.qalculator.app.ui
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind

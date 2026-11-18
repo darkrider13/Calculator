@@ -1,4 +1,4 @@
-package com.bazarhisab.app.ui
+package com.qalculator.app.ui
 
 import android.os.Build
 import androidx.activity.compose.BackHandler

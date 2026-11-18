@@ -1,4 +1,4 @@
-package com.bazarhisab.app.ui
+package com.qalculator.app.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -64,27 +64,27 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bazarhisab.app.AppState
-import com.bazarhisab.app.logic.FLASH_DUPLICATE
-import com.bazarhisab.app.logic.FLASH_SAVED
-import com.bazarhisab.app.logic.Form
-import com.bazarhisab.app.logic.HistEntry
-import com.bazarhisab.app.logic.MemoView
-import com.bazarhisab.app.logic.SaveResult
-import com.bazarhisab.app.logic.UNIT_OPTS
-import com.bazarhisab.app.logic.baseParts
-import com.bazarhisab.app.logic.bnDigits
-import com.bazarhisab.app.logic.dimOf
-import com.bazarhisab.app.logic.memoOf
-import com.bazarhisab.app.logic.money
-import com.bazarhisab.app.logic.numf
-import com.bazarhisab.app.logic.pickLabel
-import com.bazarhisab.app.logic.pickUnit
-import com.bazarhisab.app.logic.qty
-import com.bazarhisab.app.logic.reuseForm
-import com.bazarhisab.app.logic.saveEntry
-import com.bazarhisab.app.logic.uid
-import com.bazarhisab.app.logic.whenLabel
+import com.qalculator.app.AppState
+import com.qalculator.app.logic.FLASH_DUPLICATE
+import com.qalculator.app.logic.FLASH_SAVED
+import com.qalculator.app.logic.Form
+import com.qalculator.app.logic.HistEntry
+import com.qalculator.app.logic.MemoView
+import com.qalculator.app.logic.SaveResult
+import com.qalculator.app.logic.UNIT_OPTS
+import com.qalculator.app.logic.baseParts
+import com.qalculator.app.logic.bnDigits
+import com.qalculator.app.logic.dimOf
+import com.qalculator.app.logic.memoOf
+import com.qalculator.app.logic.money
+import com.qalculator.app.logic.numf
+import com.qalculator.app.logic.pickLabel
+import com.qalculator.app.logic.pickUnit
+import com.qalculator.app.logic.qty
+import com.qalculator.app.logic.reuseForm
+import com.qalculator.app.logic.saveEntry
+import com.qalculator.app.logic.uid
+import com.qalculator.app.logic.whenLabel
 import kotlinx.coroutines.delay
 
 /*
@@ -332,7 +332,7 @@ private fun UnitPick(ctl: PriceController, id: String, unit: String) {
                 overlays.closeMenu()
             } else {
                 ctl.menuFor = id
-                val cur = if (com.bazarhisab.app.logic.UNITS.containsKey(unit)) unit else "g"
+                val cur = if (com.qalculator.app.logic.UNITS.containsKey(unit)) unit else "g"
                 overlays.openMenu(rect, UNIT_OPTS, cur) { v -> ctl.onPickUnit(id, v) }
             }
         }

@@ -1,4 +1,4 @@
-package com.bazarhisab.app.ui
+package com.qalculator.app.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -64,10 +64,10 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bazarhisab.app.logic.CALC_KEYS
-import com.bazarhisab.app.logic.KeyDef
-import com.bazarhisab.app.logic.Seg
-import com.bazarhisab.app.logic.fitOutRem
+import com.qalculator.app.logic.CALC_KEYS
+import com.qalculator.app.logic.KeyDef
+import com.qalculator.app.logic.Seg
+import com.qalculator.app.logic.fitOutRem
 import kotlinx.coroutines.delay
 
 /*

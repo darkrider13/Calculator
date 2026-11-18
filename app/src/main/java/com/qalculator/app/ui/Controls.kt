@@ -1,4 +1,4 @@
-package com.bazarhisab.app.ui
+package com.qalculator.app.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource

@@ -1,31 +1,31 @@
-package com.bazarhisab.app.ui
+package com.qalculator.app.ui
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import com.bazarhisab.app.AppState
-import com.bazarhisab.app.logic.CalcEntry
-import com.bazarhisab.app.logic.CalcState
-import com.bazarhisab.app.logic.VState
-import com.bazarhisab.app.logic.VView
-import com.bazarhisab.app.logic.commitVerify
-import com.bazarhisab.app.logic.jsNumStr
-import com.bazarhisab.app.logic.openVerify
-import com.bazarhisab.app.logic.vDelete
-import com.bazarhisab.app.logic.vEditStart
-import com.bazarhisab.app.logic.vInputFilter
-import com.bazarhisab.app.logic.vRender
-import com.bazarhisab.app.logic.vSaveEdit
-import com.bazarhisab.app.logic.vSelect
-import com.bazarhisab.app.logic.vStep
-import com.bazarhisab.app.logic.addCalcEntry
-import com.bazarhisab.app.logic.commitEdit
-import com.bazarhisab.app.logic.moveCaret
-import com.bazarhisab.app.logic.press
-import com.bazarhisab.app.logic.renderCalc
-import com.bazarhisab.app.logic.tapNum
+import com.qalculator.app.AppState
+import com.qalculator.app.logic.CalcEntry
+import com.qalculator.app.logic.CalcState
+import com.qalculator.app.logic.VState
+import com.qalculator.app.logic.VView
+import com.qalculator.app.logic.commitVerify
+import com.qalculator.app.logic.jsNumStr
+import com.qalculator.app.logic.openVerify
+import com.qalculator.app.logic.vDelete
+import com.qalculator.app.logic.vEditStart
+import com.qalculator.app.logic.vInputFilter
+import com.qalculator.app.logic.vRender
+import com.qalculator.app.logic.vSaveEdit
+import com.qalculator.app.logic.vSelect
+import com.qalculator.app.logic.vStep
+import com.qalculator.app.logic.addCalcEntry
+import com.qalculator.app.logic.commitEdit
+import com.qalculator.app.logic.moveCaret
+import com.qalculator.app.logic.press
+import com.qalculator.app.logic.renderCalc
+import com.qalculator.app.logic.tapNum
 
 /**
  * Holds the `calc` object of the original (the calculator tab state). It lives as long as the app screen,

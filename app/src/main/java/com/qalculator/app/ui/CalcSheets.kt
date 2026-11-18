@@ -1,4 +1,4 @@
-package com.bazarhisab.app.ui
+package com.qalculator.app.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -68,15 +68,15 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.graphicsLayer
-import com.bazarhisab.app.logic.CalcEntry
-import com.bazarhisab.app.logic.VPiece
-import com.bazarhisab.app.logic.VView
-import com.bazarhisab.app.logic.canVerify
-import com.bazarhisab.app.logic.dispExpr
-import com.bazarhisab.app.logic.numE
-import com.bazarhisab.app.logic.vInputRem
-import com.bazarhisab.app.logic.vInputWidthEm
-import com.bazarhisab.app.logic.whenLabel
+import com.qalculator.app.logic.CalcEntry
+import com.qalculator.app.logic.VPiece
+import com.qalculator.app.logic.VView
+import com.qalculator.app.logic.canVerify
+import com.qalculator.app.logic.dispExpr
+import com.qalculator.app.logic.numE
+import com.qalculator.app.logic.vInputRem
+import com.qalculator.app.logic.vInputWidthEm
+import com.qalculator.app.logic.whenLabel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -480,8 +480,8 @@ private fun VSum(ctl: CalcController, view: VView) {
 
 /** the text a long-press copies: the expression as shown, = and the plain result */
 private fun copyTextOf(src: String): String {
-    val all = com.bazarhisab.app.logic.vEval(src)
-    return dispExpr(src) + " = " + com.bazarhisab.app.logic.rawNum(all)
+    val all = com.qalculator.app.logic.vEval(src)
+    return dispExpr(src) + " = " + com.qalculator.app.logic.rawNum(all)
 }
 
 /** the left / right arrow button */
