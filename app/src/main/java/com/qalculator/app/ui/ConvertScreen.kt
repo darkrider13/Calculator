@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 
 /*
  * The convert page: only the list of options (3 per row), same style as the reference picture.
- * Opened by the ruler button under the display. The options do not open anything yet.
+ * Opened by the ruler button under the display. Only "Price" opens a page (the price / dam hishab tab).
  */
 
 private val ConvInk = Color(0xFFD4D4D8)
@@ -96,13 +96,29 @@ private val ConvertOptions = listOf(
             ),
             1.7f
         )
+    ),
+    // price tag logo: opens the price (dam hishab) page
+    ConvertOption(
+        "Price",
+        IconDef(
+            listOf(
+                "M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z",
+                "M7.5 7.5h.01"
+            ),
+            1.7f
+        )
     )
 )
 
 @Composable
-fun ConvertScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
-    // phone back button / gesture: back to the calculator
-    BackHandler(enabled = true) { onBack() }
+fun ConvertScreen(
+    onBack: () -> Unit,
+    onPrice: () -> Unit,
+    backEnabled: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    // phone back button / gesture: back to the calculator (off while the price page is open on top)
+    BackHandler(enabled = backEnabled) { onBack() }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -113,7 +129,9 @@ fun ConvertScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         for (rowItems in ConvertOptions.chunked(3)) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 for (opt in rowItems) {
-                    Box(modifier = Modifier.weight(1f)) { ConvertCell(opt) }
+                    Box(modifier = Modifier.weight(1f)) {
+                        ConvertCell(opt) { if (opt.label == "Price") onPrice() }
+                    }
                 }
                 for (i in 0 until 3 - rowItems.size) {
                     Spacer(modifier = Modifier.weight(1f))
@@ -124,9 +142,9 @@ fun ConvertScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ConvertCell(opt: ConvertOption) {
+private fun ConvertCell(opt: ConvertOption, onClick: () -> Unit) {
     PressBox(
-        onClick = { /* options only for now: no details page */ },
+        onClick = onClick,
         pressedScale = 0.94f,
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier
