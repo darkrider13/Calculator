@@ -157,10 +157,11 @@ fun rawNum(v: Double): String = if (v.isFinite()) formatNumber(v, 0, 6, false, f
 
 /** the expression as shown on screen: × ÷ − with spaces around operators */
 fun dispExpr(s: String): String {
-    var t = s.replace("*", "×").replace("/", "÷").replace("-", "−")
+    var t = s.replace("ʳ", "").replace(Regex("a(sin|cos|tan)\\("), "\$1⁻¹(")
+    t = t.replace("*", "×").replace("/", "÷").replace("-", "−")
     t = Regex("([+×÷−])").replace(t, " \$1 ")
     t = Regex("[\\s\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]+").replace(t, " ")
-    return t.trim()
+    return t.replace("( − ", "(−").replace("^ − ", "^−").trim()
 }
 
 /** 1000 or more gram/ml shows as kg/litre, less stays gram/ml */

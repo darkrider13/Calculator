@@ -30,12 +30,15 @@ data class CalcState(
     val ed: Int = -1,
     val edText: String = "",
     val edPos: Int = 0,
-    val view: CalcView = CalcView()
+    val view: CalcView = CalcView(),
+    /** angle mode of sin/cos/tan: false = degrees, true = radians */
+    val rad: Boolean = false
 )
 
 class PressResult(val state: CalcState, val entry: CalcEntry? = null)
 
 const val ERR_DIV = "ভাগ করা যায় না"
+const val ERR_DOM = "ভুল ইনপুট"
 
 /** the keys: label, key code, class, (aria label is not needed) */
 class KeyDef(val label: String, val k: String, val cls: String)
@@ -50,7 +53,7 @@ val CALC_KEYS: List<KeyDef> = listOf(
 
 // ---------------------------------------------------------------- expression line
 
-private val TOK_RE = Regex("([0-9]+\\.?[0-9]*|\\.[0-9]+)|([+\\-*/%()])")
+private val TOK_RE = Regex("([0-9]+\\.?[0-9]*|\\.[0-9]+)|([+\\-*/%()])|((?:$FN_SRC)\\(|π|e|!|²|⁻¹|\\^)")
 
 private fun sym(op: Char): String = when (op) {
     '*' -> "×"
@@ -75,6 +78,19 @@ fun exprSegs(src: String, k: Int, tail: String): List<Seg> {
     }
     for (m in TOK_RE.findAll(src)) {
         val g1 = m.groups[1]
+        val g3 = m.groups[3]
+        if (g3 != null) {
+            val t = g3.value
+            if (t == "^") {
+                sb.append("^"); prev = "*"
+            } else if (t == "π" || t == "e" || t == "!" || t == "²" || t == "⁻¹") {
+                sb.append(t); prev = "n"
+            } else {
+                // a function: asin( is shown as sin⁻¹( and the radians mark is hidden
+                sb.append(t.replace("ʳ", "").replace(Regex("^a(sin|cos|tan)"), "\$1⁻¹")); prev = "("
+            }
+            continue
+        }
         if (g1 != null) {
             flush()
             if (n == k) out.add(Seg.Edit) else out.add(Seg.Num(n, g1.value))
@@ -164,7 +180,7 @@ fun renderCalc(s: CalcState): CalcState {
         top = exprSegs(s.last, -1, " =")
         out = numE(jsParseFloat(e), 6)
         raw = rawNum(jsParseFloat(e))
-    } else if (hasOp(t) || t.contains('(')) {
+    } else if (hasOp(t) || t.contains('(') || isSci(e)) {
         top = exprSegs(e, -1, "")
         val v = evalOrNaN(t)
         if (v.isFinite()) {
@@ -212,7 +228,7 @@ fun commitEdit(s: CalcState): Pair<CalcState, Boolean> {
     return Pair(renderCalc(s.copy(expr = expr, ed = -1, edText = "", edPos = 0)), gone)
 }
 
-private val OPS_END_RE = Regex("[+\\-*/]+\\z")
+private val OPS_END_RE = Regex("[+\\-*/^]+\\z")
 
 /** editOp: an operator key while editing changes the operator before the number. null = not handled */
 private fun editOp(s: CalcState, k: String): CalcState? {
@@ -279,16 +295,51 @@ fun moveCaret(s: CalcState, pos: Int): CalcState {
 
 // ---------------------------------------------------------------- press
 
-private val END_DIGIT_PCT_PAREN = Regex("[0-9%)]\\z")
-private val END_PCT_PAREN = Regex("[%)]\\z")
+private val END_DIGIT_PCT_PAREN = Regex("[0-9%)πe!²¹]\\z")
+private val END_PCT_PAREN = Regex("[%)πe!²¹]\\z")
 private val END_DIGIT_PAREN = Regex("[0-9)]\\z")
-private val ZERO_AT_END = Regex("(^|[+\\-*/(])0\\z")
-private val END_MUL_DIV = Regex("[*/]\\z")
-private val END_OP = Regex("[+\\-*/]\\z")
+private val ZERO_AT_END = Regex("(^|[+\\-*/^(])0\\z")
+private val END_MUL_DIV = Regex("[*/^]\\z")
+private val END_OP = Regex("[+\\-*/^]\\z")
 private val NUM_PCT_END = Regex("([0-9]+\\.?[0-9]*|\\.[0-9]+)(%?)\\z")
-private val UNARY_MINUS_END = Regex("(^|[*/(])-\\z")
-private val OP_START_END = Regex("[*/(]\\z")
+private val UNARY_MINUS_END = Regex("(^|[*/^(])-\\z")
+private val OP_START_END = Regex("[*/^(]\\z")
 private val CUR_NUM_END = Regex("[0-9.]*\\z")
+
+// ---------------------------------------------------------------- scientific keys
+
+private val CAN_MUL_END = Regex("[0-9%)πe!²¹.]\\z")
+private val POST_OK = Regex("[0-9)πe!²¹]\\z")
+private val CLOSE_OK = Regex("[0-9%)πe!²¹]\\z")
+private val TOKEN_END_RE = Regex("(?:(?:$FN_SRC)\\(|⁻¹)\\z")
+private val TRIG_NO_R = Regex("(a?(?:sin|cos|tan))\\(")
+
+/** key code to the text it puts in the expression (a "function": it opens a bracket) */
+private val SCI_FN = mapOf(
+    "sin" to "sin", "cos" to "cos", "tan" to "tan",
+    "asin" to "asin", "acos" to "acos", "atan" to "atan",
+    "lg" to "lg", "ln" to "ln", "√" to "√",
+    "10x" to "10^", "ex" to "e^"
+)
+private val TRIG_KEYS = setOf("sin", "cos", "tan", "asin", "acos", "atan")
+
+/** a number or bracket before a new function / constant / "(" gets a × in between */
+private fun mulJoin(e: String, tok: String): String =
+    if (CAN_MUL_END.containsMatchIn(e)) "$e*$tok" else e + tok
+
+/** backspace takes a whole function name (sin() or ⁻¹ at once */
+private fun dropLastToken(e: String): String {
+    val m = TOKEN_END_RE.find(e)
+    return if (m != null) e.substring(0, m.range.first) else e.dropLast(1)
+}
+
+/** the deg / rad key: the trig functions already typed change with it */
+fun setAngle(s0: CalcState, rad: Boolean): CalcState {
+    var s = s0
+    if (s.ed >= 0) s = commitEdit(s).first
+    val ne = if (rad) TRIG_NO_R.replace(s.expr) { it.groupValues[1] + "ʳ(" } else s.expr.replace("ʳ", "")
+    return renderCalc(s.copy(expr = ne, rad = rad))
+}
 
 /** press(k): the same steps as the original, state in, state out (+ the saved entry when "=" works) */
 fun press(s0: CalcState, k: String, ts: Long = System.currentTimeMillis(), id: String = uid()): PressResult {
@@ -321,7 +372,7 @@ fun press(s0: CalcState, k: String, ts: Long = System.currentTimeMillis(), id: S
     } else if (k == "⌫") {
         if (fresh) {
             expr = ""; fresh = false; last = ""
-        } else expr = e.dropLast(1)
+        } else expr = dropLastToken(e)
     } else if (k == "=") {
         if (fresh) return PressResult(st())
         val t = closeParens(trimTail(e))
@@ -329,7 +380,7 @@ fun press(s0: CalcState, k: String, ts: Long = System.currentTimeMillis(), id: S
         var v = evalOrNaN(t)
         if (!v.isFinite()) {
             last = t; expr = ""
-            return PressResult(renderCalc(st(ERR_DIV)))
+            return PressResult(renderCalc(st(if (isSci(t) && !t.contains('/')) ERR_DOM else ERR_DIV)))
         }
         v = round8(v)
         val str = jsNumStr(v)
@@ -386,6 +437,34 @@ fun press(s0: CalcState, k: String, ts: Long = System.currentTimeMillis(), id: S
         if (!END_DIGIT_PAREN.containsMatchIn(e)) return done()
         fresh = false
         expr = "$e%"
+    } else if (SCI_FN.containsKey(k)) {
+        // sin cos tan ... lg ln √ 10^ e^ : opens "name(" ; after a result it wraps the result
+        val base = SCI_FN.getValue(k)
+        val name = if (s.rad && k in TRIG_KEYS) base + "ʳ" else base
+        val tok = if (base.endsWith("^")) "$base(" else "$name("
+        if (fresh) {
+            expr = tok + e + ")"; fresh = false
+        } else expr = mulJoin(e, tok)
+    } else if (k == "π" || k == "e") {
+        if (fresh) {
+            e = ""; fresh = false; last = ""
+        }
+        expr = mulJoin(e, k)
+    } else if (k == "!" || k == "²" || k == "inv") {
+        if (!POST_OK.containsMatchIn(e)) return done()
+        fresh = false
+        expr = e + (if (k == "inv") "⁻¹" else k)
+    } else if (k == "(") {
+        if (fresh) {
+            e = ""; fresh = false; last = ""
+        }
+        expr = mulJoin(e, "(")
+    } else if (k == ")") {
+        val op = e.count { it == '(' }
+        val cl = e.count { it == ')' }
+        if (op <= cl || !CLOSE_OK.containsMatchIn(e)) return done()
+        fresh = false
+        expr = "$e)"
     } else {
         fresh = false
         if (e == "" || e.endsWith("(")) {
