@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.qalculator.app.logic.Seg
+import kotlinx.coroutines.delay
 
 /*
  * The floating calculator (a small window over other apps, shown by FloatService).
@@ -36,14 +38,24 @@ import com.qalculator.app.logic.Seg
 const val FLOAT_W_DP = 250
 const val FLOAT_HEADER_DP = 36
 
+/** the window height while the scientific keys open / close (taller than both sizes, so it needs no resize per frame) */
+const val FLOAT_TALL_DP = 450
+
 private val IcOpen = IconDef(listOf("M14 4h6v6", "M20 4l-7 7", "M10 20H4v-6", "M4 20l7-7"), 2f)
 private val IcClose = IconDef(listOf("M6 6l12 12", "M18 6L6 18"), 2f)
 
 @Composable
-fun FloatCalc(ctl: CalcController, onOpenApp: () -> Unit, onClose: () -> Unit) {
+fun FloatCalc(ctl: CalcController, onOpenApp: () -> Unit, onClose: () -> Unit, onAnimating: (Boolean) -> Unit) {
     val dens = LocalDensity.current
     // sp == dp, like in the app
     val fixed = remember(dens.density) { Density(dens.density, 1f) }
+    // the window itself must not change its size on every frame of the key animation (that is what made it
+    // jump and stutter): it gets a fixed tall size while the keys move, and wraps the content again after
+    LaunchedEffect(ctl.sciOpen) {
+        onAnimating(true)
+        delay(480)
+        onAnimating(false)
+    }
     CompositionLocalProvider(LocalDensity provides fixed) {
         val shape = RoundedCornerShape(22.dp)
         Column(
