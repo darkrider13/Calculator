@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import com.qalculator.app.ui.CalcController
 import com.qalculator.app.ui.CalcScreen
 import com.qalculator.app.ui.ConvertScreen
+import com.qalculator.app.ui.PricePage
 import com.qalculator.app.ui.LocalCompact
 import com.qalculator.app.ui.LocalViewportH
 import com.qalculator.app.ui.PriceController
@@ -44,7 +45,9 @@ import com.qalculator.app.ui.pageBackground
 fun QalculatorApp(state: AppState) {
     val overlays = remember { Overlays() }
     val calcCtl = remember { CalcController(state) }
+    val priceCtl = remember { PriceController(state) }
     var showConvert by remember { mutableStateOf(false) }
+    var showPrice by remember { mutableStateOf(false) }
     // CSS px never follow the phone's font-size setting (the old WebView app ignored it too), so sp == dp here:
     // this keeps every fixed-height row from overlapping when the system font size is large
     val dens = LocalDensity.current
@@ -86,6 +89,19 @@ fun QalculatorApp(state: AppState) {
                             if (showConvert) {
                                 ConvertScreen(
                                     onBack = { showConvert = false },
+                                    onPrice = { showPrice = true },
+                                    backEnabled = !showPrice,
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .fillMaxHeight()
+                                        .widthIn(max = 460.dp)
+                                        .fillMaxWidth()
+                                )
+                            }
+                            if (showPrice) {
+                                PricePage(
+                                    ctl = priceCtl,
+                                    onBack = { showPrice = false },
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
                                         .fillMaxHeight()
