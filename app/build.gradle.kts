@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.bazarhisab.app"
+    namespace = "com.qalculator.app"
     compileSdk = 34
 
     defaultConfig {
