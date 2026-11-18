@@ -1,4 +1,4 @@
-package com.bazarhisab.app.logic
+package com.qalculator.app.logic
 
 /*
  * Saved data + the pure rules around it (fixUnits, uniq, normalize, loadLocal, saveEntry, reuse).
@@ -7,7 +7,7 @@ package com.bazarhisab.app.logic
 
 const val MAX_HIST = 300
 const val MAX_CALC = 300
-const val STORAGE_KEY = "bazar-hisab-v1"
+const val STORAGE_KEY = "qalculator-v1"
 
 /** the price tab inputs. m = "w" (পরিমাণ দিয়ে টাকা) or "p" (টাকা দিয়ে পরিমাণ) */
 data class Form(

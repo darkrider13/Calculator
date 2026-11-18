@@ -1,4 +1,4 @@
-package com.bazarhisab.app.logic
+package com.qalculator.app.logic
 
 /*
  * What the memo box of the price tab shows (the text part of the original renderPrice()).

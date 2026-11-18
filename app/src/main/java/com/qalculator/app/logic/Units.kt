@@ -1,4 +1,4 @@
-package com.bazarhisab.app.logic
+package com.qalculator.app.logic
 
 /** Same as UNITS / BASE / SWAP / dimOf in the original code. d = 'w' (weight) or 'v' (volume). */
 data class UnitDef(val n: String, val f: Double, val d: Char)

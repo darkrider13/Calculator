@@ -1,4 +1,4 @@
-package com.bazarhisab.app.logic
+package com.qalculator.app.logic
 
 /*
  * Small JSON reader/writer. Writes exactly what JavaScript's JSON.stringify wrote,

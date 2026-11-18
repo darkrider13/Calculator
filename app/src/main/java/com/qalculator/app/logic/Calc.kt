@@ -1,4 +1,4 @@
-package com.bazarhisab.app.logic
+package com.qalculator.app.logic
 
 /*
  * Calculator + price logic. Line by line copy of the original functions:

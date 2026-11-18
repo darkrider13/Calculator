@@ -1,4 +1,4 @@
-package com.bazarhisab.app.logic
+package com.qalculator.app.logic
 
 /*
  * The calculator tab logic (the `calc` object, press(), renderCalc(), the number edit mode).

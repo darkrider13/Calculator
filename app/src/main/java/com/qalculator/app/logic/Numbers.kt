@@ -1,4 +1,4 @@
-package com.bazarhisab.app.logic
+package com.qalculator.app.logic
 
 import java.math.BigDecimal
 import java.math.MathContext

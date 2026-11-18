@@ -1,4 +1,4 @@
-package com.bazarhisab.app.logic
+package com.qalculator.app.logic
 
 /*
  * মিলান (verify) sheet logic: step through the numbers of a saved calculation.
