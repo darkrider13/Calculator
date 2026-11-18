@@ -67,8 +67,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.qalculator.app.logic.CALC_KEYS
-import com.qalculator.app.logic.KeyDef
+import com.qalculator.app.FloatLauncher
 import com.qalculator.app.logic.Seg
 import com.qalculator.app.logic.fitOutRem
 import kotlinx.coroutines.delay
@@ -167,6 +166,7 @@ private fun CalcDisplay(ctl: CalcController, modifier: Modifier, vh: Float) {
 /** the small icon row under the display: history, ruler (convert, later), scientific (later), backspace */
 @Composable
 private fun IconRow(ctl: CalcController, onConvert: () -> Unit) {
+    val ctx = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,6 +199,15 @@ private fun IconRow(ctl: CalcController, onConvert: () -> Unit) {
             modifier = Modifier.size(48.dp)
         ) {
             SvgIcon(Icons.SciCalc, if (ctl.sciOpen) Q.KeyGreen else Q.IconGray, Modifier.size(24.dp))
+        }
+        Spacer(Modifier.width(9.dp))
+        // floating window: the calculator goes over the other apps
+        PressBox(
+            onClick = { FloatLauncher.open(ctx) },
+            pressedScale = 0.92f,
+            modifier = Modifier.size(48.dp)
+        ) {
+            SvgIcon(Icons.FloatWin, Q.IconGray, Modifier.size(24.dp))
         }
         Spacer(Modifier.weight(1f))
         // backspace (same function as before)

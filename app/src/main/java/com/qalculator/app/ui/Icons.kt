@@ -58,6 +58,15 @@ object Icons {
         1.5f
     )
 
+    /** floating window: a screen with a small window in the corner */
+    val FloatWin = IconDef(
+        listOf(
+            "M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
+            "M12.5 12.5h6v4.5h-6z"
+        ),
+        1.7f
+    )
+
     /** backspace key */
     val Backspace = IconDef(
         listOf("M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z", "M16 9.5l-5 5M11 9.5l5 5"),
