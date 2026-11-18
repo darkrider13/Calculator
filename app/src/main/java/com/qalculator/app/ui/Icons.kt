@@ -37,6 +37,27 @@ object Icons {
     /** history clock: circle cx12 cy12 r9 + hands */
     val Clock = IconDef(listOf("M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0", "M12 7v5l3.5 2"), 2f)
 
+    /** ruler (convert button place) */
+    val Ruler = IconDef(
+        listOf(
+            "M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z",
+            "M7.5 6v3 M11 6v2 M14.5 6v3 M18 6v2"
+        ),
+        1.7f
+    )
+
+    /** scientific calculator icon (design only) */
+    val SciCalc = IconDef(
+        listOf(
+            "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
+            "M6 8l1.2 1.6 1.6-3.8h2.2",
+            "M13.5 6.5h4 M14.8 6.5v3.2 M17 6.5v3.2",
+            "M6.5 15.2h3a1.5 1.5 0 1 0-.4 1.8",
+            "M13 14.2h5 M13 17h5"
+        ),
+        1.5f
+    )
+
     /** backspace key */
     val Backspace = IconDef(
         listOf("M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z", "M16 9.5l-5 5M11 9.5l5 5"),

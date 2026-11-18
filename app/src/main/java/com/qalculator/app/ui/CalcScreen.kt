@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -99,46 +102,45 @@ fun CalcScreen(ctl: CalcController, modifier: Modifier = Modifier) {
                     .fillMaxSize()
                     .graphicsLayer { alpha = if (ctl.verify != null) 0f else 1f }
             ) {
-                CalcHistorySheet(ctl)
+                CalcHistorySheet(ctl, Modifier.padding(horizontal = 16.dp, vertical = 12.dp))
             }
         }
-        if (ctl.verify != null) VerifySheet(ctl)
+        if (ctl.verify != null) VerifySheet(ctl, Modifier.padding(horizontal = 16.dp, vertical = 12.dp))
     }
 }
 
 @Composable
 private fun CalcMain(ctl: CalcController, modifier: Modifier) {
-    val compact = LocalCompact.current
     val vh = LocalViewportH.current.value
-    val gap = if (compact) 6f else 10f
-    val gridGap = if (compact) 6f else 8f
     BoxWithConstraints(modifier = modifier) {
-        val h = maxHeight.value
-        // .screen: flex 1 1 0, min-height 96   .keys: flex 0 1 460px
-        val minScreen = 96f
-        val fullKeys = 460f
-        val keysH: Float
-        val screenH: Float
-        if (h - gap >= minScreen + fullKeys) {
-            keysH = fullKeys
-            screenH = h - gap - fullKeys
-        } else {
-            screenH = minScreen
-            keysH = Math.max(0f, h - gap - minScreen)
-        }
-        // five rows of minmax(44px, 1fr)
-        val gridH = Math.max(keysH, 44f * 5f + gridGap * 4f)
-        val rowH = (gridH - gridGap * 4f) / 5f
-        val keyFont = Math.min(Math.max(0.036f * vh, 18.4f), 24f)
+        // NEW DESIGN: round keys, no display card. Measurements come from the reference picture (px / 2 = dp).
+        val sideMargin = 15.dp
+        val gapX = 11.dp
+        val gapY = 8.dp
+        val iconRowH = 56.dp
+        val belowIcons = 12.dp + 1.dp + 31.dp // space + divider + space
+        val bottomMargin = 15.dp
+        val minDisplay = 96.dp
+        val byWidth = (maxWidth - sideMargin * 2 - gapX * 3) / 4
+        val keysMax = maxHeight - minDisplay - iconRowH - belowIcons - bottomMargin
+        val byHeight = (keysMax - gapY * 4) / 5
+        val d = Math.max(36f, Math.min(byWidth.value, byHeight.value)).dp
+        val keyFont = Math.min(Math.max(d.value * 0.44f, 20f), 34f)
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            CalcDisplay(ctl, { ctl.openSheet() }, screenH.dp, vh)
-            Spacer(Modifier.height(gap.dp))
-            KeyGrid(ctl, gridGap.dp, rowH.dp, keyFont, Modifier.height(gridH.dp))
+        Column(modifier = Modifier.fillMaxSize()) {
+            CalcDisplay(ctl, Modifier.weight(1f), vh)
+            IconRow(ctl)
+            Spacer(Modifier.height(12.dp))
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 19.dp)
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Q.Divider)
+            )
+            Spacer(Modifier.height(31.dp))
+            KeyGrid(ctl, gapX, gapY, d, keyFont)
+            Spacer(Modifier.height(bottomMargin))
         }
     }
 }
@@ -146,49 +148,61 @@ private fun CalcMain(ctl: CalcController, modifier: Modifier) {
 // ---------------------------------------------------------------- display
 
 @Composable
-private fun CalcDisplay(ctl: CalcController, onOpenHistory: () -> Unit, height: Dp, vh: Float) {
-    Box(
+private fun CalcDisplay(ctl: CalcController, modifier: Modifier, vh: Float) {
+    // no card / border any more: the numbers sit directly on the black background
+    DisplayColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 24.dp, end = 33.dp, top = 8.dp, bottom = 8.dp),
+        expr = { ExprLine(ctl) },
+        out = { OutText(ctl, vh) }
+    )
+}
+
+/** the small icon row under the display: history, ruler (convert, later), scientific (later), backspace */
+@Composable
+private fun IconRow(ctl: CalcController) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(height)
-            .panel(Q.Surface, 14.dp, border = Q.Line, highlight = Q.HlPanel)
+            .height(56.dp)
+            .padding(horizontal = 28.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // inside the border (overflow: hidden)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(1.dp)
-                .clip(RoundedCornerShape(13.dp))
+        // history (same function as before)
+        PressBox(
+            onClick = { ctl.openSheet() },
+            pressedScale = 0.92f,
+            modifier = Modifier.size(48.dp)
         ) {
-            DisplayColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                expr = { ExprLine(ctl) },
-                out = { OutText(ctl, vh) }
-            )
-            // history button (top left)
-            PressBox(
-                onClick = onOpenHistory,
-                pressedScale = 0.95f,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
-                    .size(42.dp)
-            ) {
-                SvgIcon(Icons.Clock, Q.Muted, Modifier.size(22.dp))
-            }
-            // backspace button (bottom left)
-            PressBox(
-                onClick = { ctl.onKey("⌫") },
-                pressedScale = 0.95f,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(8.dp)
-                    .size(42.dp)
-            ) {
-                SvgIcon(Icons.Backspace, Q.Muted, Modifier.size(22.dp))
-            }
+            SvgIcon(Icons.Clock, Q.IconGray, Modifier.size(24.dp))
+        }
+        Spacer(Modifier.width(9.dp))
+        // ruler: the place for the convert button (the price screen will be connected here later)
+        PressBox(
+            onClick = { /* TODO: convert button -> price screen */ },
+            pressedScale = 0.92f,
+            modifier = Modifier.size(48.dp)
+        ) {
+            SvgIcon(Icons.Ruler, Q.IconGray, Modifier.size(24.dp))
+        }
+        Spacer(Modifier.width(9.dp))
+        // scientific icon: only the design for now, no function
+        PressBox(
+            onClick = { },
+            pressedScale = 0.92f,
+            modifier = Modifier.size(48.dp)
+        ) {
+            SvgIcon(Icons.SciCalc, Q.IconGray, Modifier.size(24.dp))
+        }
+        Spacer(Modifier.weight(1f))
+        // backspace (same function as before)
+        PressBox(
+            onClick = { ctl.onKey("⌫") },
+            pressedScale = 0.92f,
+            modifier = Modifier.size(48.dp)
+        ) {
+            SvgIcon(Icons.Backspace, Q.BackGreen, Modifier.size(24.dp))
         }
     }
 }
@@ -273,7 +287,7 @@ private fun ExprLine(ctl: CalcController) {
     val rowPx = with(density) { ROW_DP.dp.toPx() }
     val rowSp = with(density) { ROW_DP.dp.toSp() }
     val style = remember(rowSp) {
-        qStylePx(22.4f, 400, Q.Muted, tnum = true, align = TextAlign.End).copy(lineHeight = rowSp)
+        qStylePx(22.4f, 400, Q.ExprGray, tnum = true, align = TextAlign.End).copy(lineHeight = rowSp)
     }
 
     // the edit box (inline in the text)
@@ -350,7 +364,6 @@ private fun ExprLine(ctl: CalcController) {
             .fillMaxWidth()
             .onSizeChanged { viewportH = it.height }
             .verticalScroll(scroll)
-            .padding(start = 52.dp)
     ) {
         BasicText(
             text = built.text,
@@ -442,11 +455,16 @@ private fun OutText(ctl: CalcController, vh: Float) {
     // clamp(2.6rem, 8vh, 3.6rem), or the fitOut size for long results
     val size = if (rem > 0f) rem * 16f else Math.min(Math.max(0.08f * vh, 41.6f), 57.6f)
     val ctlNow by rememberUpdatedState(ctl)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End
+    ) {
     BasicText(
         text = view.out,
         style = qStylePx(size, 700, Q.Ink, lh = 1.2f, tnum = true, align = TextAlign.End),
         modifier = Modifier
-            .fillMaxWidth()
+            .weight(1f)
             .pointerInput(Unit) {
                 val slop = 12.dp.toPx()
                 awaitEachGesture {
@@ -475,7 +493,32 @@ private fun OutText(ctl: CalcController, vh: Float) {
                 }
             }
     )
+    // blinking green cursor after the result (hidden while a number is being edited)
+    if (ctl.state.ed < 0) BlinkCursor(size * 0.8f)
+    }
 }
+
+/** the green blinking line at the end of the result */
+@Composable
+private fun BlinkCursor(heightSp: Float) {
+    var on by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(530)
+            on = !on
+        }
+    }
+    Box(
+        modifier = Modifier
+            .padding(start = 2.dp)
+            .width(2.dp)
+            .height(heightSp.dp)
+            .graphicsLayer { alpha = if (on) 1f else 0f }
+            .background(Q.Cursor)
+    )
+}
+
+
 
 internal fun copyText(ctx: Context, txt: String): Boolean = try {
     val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -507,18 +550,19 @@ internal fun vibrate15(ctx: Context) {
 // ---------------------------------------------------------------- keypad
 
 @Composable
-private fun KeyGrid(ctl: CalcController, gap: Dp, rowH: Dp, fontSp: Float, modifier: Modifier) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(gap)) {
+private fun KeyGrid(ctl: CalcController, gapX: Dp, gapY: Dp, d: Dp, fontSp: Float) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(gapY)
+    ) {
         for (r in 0 until 5) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(rowH),
-                horizontalArrangement = Arrangement.spacedBy(gap)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(gapX, Alignment.CenterHorizontally)
             ) {
                 for (c in 0 until 4) {
                     val def = CALC_KEYS[r * 4 + c]
-                    CalcKey(def, fontSp, Modifier.weight(1f).fillMaxHeight()) { ctl.onKey(def.k) }
+                    CalcKey(def, fontSp, Modifier.size(d)) { ctl.onKey(def.k) }
                 }
             }
         }
@@ -529,21 +573,22 @@ private fun KeyGrid(ctl: CalcController, gap: Dp, rowH: Dp, fontSp: Float, modif
 private fun CalcKey(def: KeyDef, fontSp: Float, modifier: Modifier, onClick: () -> Unit) {
     val bg: Color
     val fg: Color
-    val border: Color?
     when (def.cls) {
-        "op" -> { bg = Q.AccentSoft; fg = Q.Accent; border = null }
-        "clr" -> { bg = Q.BadBg; fg = Q.Bad; border = null }
-        "eq" -> { bg = Q.Primary; fg = Q.AccentInk; border = null }
-        else -> { bg = Q.Surface; fg = Q.Ink; border = Q.Line }
+        "op" -> { bg = Q.KeyOp; fg = Q.KeyGreen }
+        "clr" -> { bg = Q.KeyOp; fg = Q.KeyRed }
+        "eq" -> { bg = Q.KeyEq; fg = Color.White }
+        else -> { bg = Q.KeyNum; fg = Q.KeyText }
     }
+    // "+/−" is a bit smaller than the digits
+    val size = if (def.label == "+/−") fontSp * 0.8f else fontSp
     PressBox(
         onClick = onClick,
-        pressedScale = 0.97f,
-        modifier = modifier.panel(bg, 14.dp, border = border)
+        pressedScale = 0.94f,
+        modifier = modifier.background(bg, CircleShape)
     ) {
         BasicText(
             text = def.label,
-            style = qStylePx(fontSp, 600, fg, lh = 1.2f, align = TextAlign.Center),
+            style = qStylePx(size, 600, fg, lh = 1.2f, align = TextAlign.Center),
             maxLines = 1,
             softWrap = false
         )

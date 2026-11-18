@@ -31,6 +31,19 @@ object Q {
     val Bad = Color(0xFFFF9C93)
     val BadBg = Color(0xFF2A0F0E)
 
+    // ---- new calculator design (round keys) ----
+    val KeyNum = Color(0xFF161616)
+    val KeyOp = Color(0xFF2C2C2E)
+    val KeyEq = Color(0xFF2F8408)
+    val KeyText = Color(0xFFF2F2F2)
+    val KeyGreen = Color(0xFF66F07F)
+    val KeyRed = Color(0xFFFF6B63)
+    val IconGray = Color(0xFF9A9A9F)
+    val BackGreen = Color(0xFF3E8E41)
+    val Divider = Color(0xFF3A3A3C)
+    val Cursor = Color(0xFF66F07F)
+    val ExprGray = Color(0xFF8E8E93)
+
     /** .primary button and the "=" key */
     val Primary = Color(0xFFCFD3DC)
 
