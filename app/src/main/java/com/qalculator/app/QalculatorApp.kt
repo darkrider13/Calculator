@@ -44,7 +44,7 @@ import com.qalculator.app.ui.pageBackground
 @Composable
 fun QalculatorApp(state: AppState) {
     val overlays = remember { Overlays() }
-    val calcCtl = remember { CalcController(state) }
+    val calcCtl = remember { state.calcCtl }
     val priceCtl = remember { PriceController(state) }
     var showConvert by remember { mutableStateOf(false) }
     var showPrice by remember { mutableStateOf(false) }

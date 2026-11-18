@@ -12,6 +12,7 @@ import com.qalculator.app.logic.HistEntry
 import com.qalculator.app.logic.STORAGE_KEY
 import com.qalculator.app.logic.loadState
 import com.qalculator.app.logic.serializeState
+import com.qalculator.app.ui.CalcController
 
 /**
  * The saved data (price form, price history, calculator history).
@@ -23,6 +24,9 @@ class AppState(context: Context) {
     private val handler = Handler(Looper.getMainLooper())
     private val saveRunnable = Runnable { saveNow() }
     private var pending = false
+
+    /** the calculator: the app screen and the floating window use the same one */
+    val calcCtl: CalcController by lazy { CalcController(this) }
 
     var form by mutableStateOf(Form())
         private set
@@ -76,5 +80,16 @@ class AppState(context: Context) {
     /** app goes to the background: write now if a save is waiting */
     fun flushIfPending() {
         if (pending) saveNow()
+    }
+
+    companion object {
+        @Volatile
+        private var inst: AppState? = null
+
+        /** one AppState for the whole process (the activity and the floating service share it) */
+        fun get(context: Context): AppState =
+            inst ?: synchronized(this) {
+                inst ?: AppState(context.applicationContext).also { inst = it }
+            }
     }
 }

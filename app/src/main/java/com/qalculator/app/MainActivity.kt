@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        appState = AppState(this)
+        appState = AppState.get(this)
         setContent {
             QalculatorApp(appState)
         }
