@@ -58,13 +58,10 @@ object Icons {
         1.5f
     )
 
-    /** floating window: a screen with a small window in the corner */
+    /** shrink to a floating window: two arrows pointing inwards (the opposite of the full screen icon) */
     val FloatWin = IconDef(
-        listOf(
-            "M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
-            "M12.5 12.5h6v4.5h-6z"
-        ),
-        1.7f
+        listOf("M4 14h6v6", "M10 14l-7 7", "M20 10h-6V4", "M14 10l7-7"),
+        2f
     )
 
     /** backspace key */
