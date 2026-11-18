@@ -126,6 +126,10 @@ private fun CalcMain(ctl: CalcController, onConvert: () -> Unit, modifier: Modif
         val byHeight = (keysMax - gapY * 4) / 5
         val d = Math.max(36f, Math.min(byWidth.value, byHeight.value)).dp
         val keyFont = Math.min(Math.max(d.value * 0.44f, 20f), 34f)
+        // the same keys when the scientific pad is open: 5 columns x 7 rows
+        val byWidth5 = (maxWidth - sideMargin * 2 - gapX * 4) / 5
+        val byHeight7 = (keysMax - gapY * 6) / 7
+        val d5 = Math.max(30f, Math.min(byWidth5.value, byHeight7.value)).dp
 
         Column(modifier = Modifier.fillMaxSize()) {
             CalcDisplay(ctl, Modifier.weight(1f), vh)
@@ -139,7 +143,7 @@ private fun CalcMain(ctl: CalcController, onConvert: () -> Unit, modifier: Modif
                     .background(Q.Divider)
             )
             Spacer(Modifier.height(31.dp))
-            KeyGrid(ctl, gapX, gapY, d, keyFont)
+            CalcKeyPad(ctl, gapX, gapY, d, d5, keyFont, maxWidth)
             Spacer(Modifier.height(bottomMargin))
         }
     }
@@ -187,13 +191,13 @@ private fun IconRow(ctl: CalcController, onConvert: () -> Unit) {
             SvgIcon(Icons.Ruler, Q.IconGray, Modifier.size(24.dp))
         }
         Spacer(Modifier.width(9.dp))
-        // scientific icon: only the design for now, no function
+        // scientific icon: shows / hides the scientific keys (the pad grows, no landscape)
         PressBox(
-            onClick = { },
+            onClick = { ctl.toggleSci() },
             pressedScale = 0.92f,
             modifier = Modifier.size(48.dp)
         ) {
-            SvgIcon(Icons.SciCalc, Q.IconGray, Modifier.size(24.dp))
+            SvgIcon(Icons.SciCalc, if (ctl.sciOpen) Q.KeyGreen else Q.IconGray, Modifier.size(24.dp))
         }
         Spacer(Modifier.weight(1f))
         // backspace (same function as before)
@@ -544,53 +548,5 @@ internal fun vibrate15(ctx: Context) {
         }
     } catch (x: Throwable) {
         // like navigator.vibrate: no vibration, no error
-    }
-}
-
-// ---------------------------------------------------------------- keypad
-
-@Composable
-private fun KeyGrid(ctl: CalcController, gapX: Dp, gapY: Dp, d: Dp, fontSp: Float) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(gapY)
-    ) {
-        for (r in 0 until 5) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(gapX, Alignment.CenterHorizontally)
-            ) {
-                for (c in 0 until 4) {
-                    val def = CALC_KEYS[r * 4 + c]
-                    CalcKey(def, fontSp, Modifier.size(d)) { ctl.onKey(def.k) }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CalcKey(def: KeyDef, fontSp: Float, modifier: Modifier, onClick: () -> Unit) {
-    val bg: Color
-    val fg: Color
-    when (def.cls) {
-        "op" -> { bg = Q.KeyOp; fg = Q.KeyGreen }
-        "clr" -> { bg = Q.KeyOp; fg = Q.KeyRed }
-        "eq" -> { bg = Q.KeyEq; fg = Color.White }
-        else -> { bg = Q.KeyNum; fg = Q.KeyText }
-    }
-    // "+/−" is a bit smaller than the digits
-    val size = if (def.label == "+/−") fontSp * 0.8f else fontSp
-    PressBox(
-        onClick = onClick,
-        pressedScale = 0.94f,
-        modifier = modifier.background(bg, CircleShape)
-    ) {
-        BasicText(
-            text = def.label,
-            style = qStylePx(size, 600, fg, lh = 1.2f, align = TextAlign.Center),
-            maxLines = 1,
-            softWrap = false
-        )
     }
 }

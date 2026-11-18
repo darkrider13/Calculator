@@ -25,6 +25,7 @@ import com.qalculator.app.logic.commitEdit
 import com.qalculator.app.logic.moveCaret
 import com.qalculator.app.logic.press
 import com.qalculator.app.logic.renderCalc
+import com.qalculator.app.logic.setAngle
 import com.qalculator.app.logic.tapNum
 
 /**
@@ -41,6 +42,28 @@ class CalcController(private val app: AppState) {
         state = r.state
         val e = r.entry
         if (e != null) app.updateCalc(addCalcEntry(app.calc, e)) // addCalc
+    }
+
+    /** the scientific keys are shown (the icon under the display) */
+    var sciOpen by mutableStateOf(false)
+        private set
+
+    /** the "2nd" key: sin→sin⁻¹, lg→10ˣ, ln→eˣ, √→x² */
+    var second by mutableStateOf(false)
+        private set
+
+    fun toggleSci() {
+        commit()
+        sciOpen = !sciOpen
+    }
+
+    fun toggleSecond() {
+        second = !second
+    }
+
+    /** deg / rad */
+    fun toggleAngle() {
+        state = setAngle(state, !state.rad)
     }
 
     /** tap on number k of the expression: edit it */
