@@ -17,9 +17,9 @@ fun rgba(r: Int, g: Int, b: Int, a: Float): Color = Color(r / 255f, g / 255f, b 
 /** All colors of the original dark theme (the :root variables + the later overrides). */
 object Q {
     val Black = Color(0xFF000000)
-    val Surface = Color(0xFF121212)
-    val Field = Color(0xFF101010)
-    val Field2 = Color(0xFF0C0C0C)
+    val Surface = Color(0xFF161616)
+    val Field = Color(0xFF2C2C2E)
+    val Field2 = Color(0xFF161616)
     val Ink = Color(0xFFF3F6FB)
     val Muted = Color(0xFF8E99AE)
     val Line = rgba(255, 255, 255, 0.12f)

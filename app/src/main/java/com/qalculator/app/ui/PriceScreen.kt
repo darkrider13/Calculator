@@ -453,7 +453,7 @@ private fun MemoBox(v: MemoView, onReset: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .panel(Q.Surface, 14.dp, border = Q.Line)
+            .panel(Q.Surface, 20.dp, border = null)
     ) {
         Box(modifier = Modifier.padding(1.dp)) {
             Column(
@@ -530,7 +530,7 @@ private fun HistBox(ctl: PriceController, overlays: Overlays) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .panel(Q.Surface, 14.dp, border = Q.Line)
+            .panel(Q.Surface, 20.dp, border = null)
             .padding(start = 13.dp, end = 13.dp, top = 7.dp, bottom = 3.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
@@ -625,7 +625,7 @@ private fun PgMini(label: String, enabled: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .size(width = 30.dp, height = 24.dp)
             .graphicsLayer { alpha = if (enabled) 1f else 0.35f }
-            .panel(Q.Field, 8.dp, border = Q.Line)
+            .panel(Q.Field, 8.dp, border = null)
     ) {
         BasicText(label, style = qStylePx(16f, 700, Q.Ink, lh = 1f, align = TextAlign.Center))
     }

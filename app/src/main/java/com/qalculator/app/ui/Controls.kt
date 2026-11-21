@@ -133,7 +133,7 @@ private fun SegBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .panel(Q.Field2, barRadius.dp, border = null, highlight = Q.HlField)
+            .panel(Q.Field2, barRadius.dp, border = null)
             .padding(pad.dp)
             .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -147,7 +147,7 @@ private fun SegBar(
                     .fillMaxHeight()
                     .heightIn(min = minHeight.dp)
                     .then(
-                        if (on) Modifier.panel(Q.Selected, itemRadius.dp, border = null, highlight = Q.HlSelected)
+                        if (on) Modifier.panel(Q.KeyOp, itemRadius.dp, border = null)
                         else Modifier
                     ),
                 contentPadding = PaddingValues(itemPad.dp)
@@ -167,7 +167,7 @@ fun TabBar(items: List<SegItem>, selected: String, onSelect: (String) -> Unit, m
     val compact = LocalCompact.current
     SegBar(
         items, selected, onSelect, modifier,
-        pad = 4, barRadius = 14, itemRadius = 10,
+        pad = 4, barRadius = 24, itemRadius = 20,
         minHeight = if (compact) 40 else 44, fontRem = 0.92f, itemPad = 6
     )
 }
@@ -178,28 +178,18 @@ fun SegSwitch(items: List<SegItem>, selected: String, onSelect: (String) -> Unit
     val compact = LocalCompact.current
     SegBar(
         items, selected, onSelect, modifier,
-        pad = 3, barRadius = 12, itemRadius = 9,
+        pad = 3, barRadius = 24, itemRadius = 20,
         minHeight = if (compact) 32 else 38, fontRem = 0.88f, itemPad = 0
     )
 }
 
-/** how a text field / unit button looks: dark box, thin border, top highlight, focus ring inside */
+/** how a text field / unit button looks: flat dark box (like the calculator keys), thin ring only when focused / open */
 fun Modifier.fieldBox(focused: Boolean = false, expanded: Boolean = false): Modifier = this.drawBehind {
-    val r = 10.dp.toPx()
-    val bw = density
+    // flat dark box like the calculator keys: no border, no top highlight; only focus / open shows a thin accent ring
+    val r = 14.dp.toPx()
     drawRoundRect(color = Q.Field, cornerRadius = CornerRadius(r))
-    val edge = if (focused || expanded) Q.Accent else Q.Line
-    drawRoundRect(
-        color = edge,
-        topLeft = Offset(bw / 2f, bw / 2f),
-        size = Size(size.width - bw, size.height - bw),
-        cornerRadius = CornerRadius(r - bw / 2f),
-        style = Stroke(width = bw)
-    )
-    drawTopHighlight(r, bw, Q.HlField)
-    if (focused) {
-        // outline: 2px solid accent; outline-offset: -2px  (inside the edge)
-        val rw = 2f * density
+    if (focused || expanded) {
+        val rw = 1.5f * density
         drawRoundRect(
             color = Q.Accent,
             topLeft = Offset(rw / 2f, rw / 2f),

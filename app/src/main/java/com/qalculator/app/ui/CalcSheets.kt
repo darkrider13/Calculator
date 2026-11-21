@@ -419,7 +419,7 @@ private fun VSum(ctl: CalcController, view: VView) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .panel(Q.Surface, 14.dp, border = Q.Line)
+            .panel(Q.Surface, 20.dp, border = null)
             .padding(horizontal = 15.dp, vertical = 11.dp)
     ) {
         Box(
@@ -492,7 +492,7 @@ private fun VArrow(label: String, onClick: () -> Unit, modifier: Modifier) {
         pressedScale = 0.96f,
         modifier = modifier
             .width(56.dp)
-            .panel(Q.AccentSoft, 16.dp, border = Q.Line),
+            .panel(Q.KeyOp, 22.dp, border = null),
         contentPadding = PaddingValues(bottom = 4.dp)
     ) {
         BasicText(label, style = qStylePx(32f, 600, Q.Accent, lh = 1f, align = TextAlign.Center))
@@ -510,7 +510,7 @@ private fun VCurrent(ctl: CalcController, view: VView, modifier: Modifier) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .panel(Q.Surface, 16.dp, border = Q.Line)
+            .panel(Q.Surface, 22.dp, border = null)
             .onSizeChanged { boxW = it.width }
             .pointerInput(Unit) {
                 val slop = 10.dp.toPx()
