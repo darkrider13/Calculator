@@ -59,6 +59,44 @@ internal val UpDownIcon = IconDef(listOf("M8 9.5l4-4 4 4", "M8 14.5l4 4 4-4"), 2
 private val PlusMinusIcon = IconDef(listOf("M8 4.5v7", "M4.5 8h7", "M13 18.5h7", "M5.5 20L18.5 4"), 1.8f)
 
 /** what the page remembers: the typed number, the two units and which row is being typed in */
+private const val FT_IN = "ftin"
+
+/** "5.7" (feet.inches) -> feet as a decimal number; the digits after the dot are whole inches */
+private fun ftInValue(s: String): Double {
+    val parts = s.split('.')
+    val ft = parts[0].toDoubleOrNull() ?: 0.0
+    val inch = parts.getOrNull(1)?.toDoubleOrNull() ?: 0.0
+    return ft + inch / 12.0
+}
+
+/** feet as a decimal number -> the typed text "feet.inches" (inches rounded to a whole number) */
+private fun ftInInput(v: Double): String {
+    if (!v.isFinite() || v <= 0.0) return "0"
+    var ft = Math.floor(v + 1e-9).toLong()
+    var inch = Math.round((v - ft) * 12.0).toInt()
+    if (inch >= 12) { ft += 1; inch = 0 }
+    return if (inch == 0) ft.toString() else ft.toString() + "." + inch
+}
+
+/** the typed text as shown: 5′ 7″ */
+private fun ftInTyped(s: String): String {
+    val parts = s.split('.')
+    val ft = parts[0].ifEmpty { "0" }
+    val inch = parts.getOrNull(1)?.ifEmpty { "0" } ?: "0"
+    return fmtInput(ft) + "′ " + inch + "″"
+}
+
+/** feet as a decimal number shown as 5′ 7.3″ */
+private fun ftInResult(v: Double): String {
+    if (!v.isFinite()) return "—"
+    var ft = Math.floor(v + 1e-9)
+    var inch = Math.round((v - ft) * 12.0 * 10.0) / 10.0
+    if (inch >= 12.0) { ft += 1.0; inch = 0.0 }
+    val inStr = if (inch == Math.floor(inch)) inch.toLong().toString() else inch.toString()
+    return fmtInput(plainNumber(ft)) + "′ " + inStr + "″"
+}
+
+/** what the page remembers: the typed number, the two units and which row is being typed in */
 private class ConverterState(val cat: ConvCategory) {
     var input by mutableStateOf("1")
     var topUnit by mutableStateOf(cat.defTop)
@@ -67,26 +105,58 @@ private class ConverterState(val cat: ConvCategory) {
 
     private fun unitOfRow(top: Boolean) = if (top) topUnit else bottomUnit
 
+    /** the typed number as a plain value in the unit of the row being typed in */
+    private fun activeValue(): Double =
+        if (unitOfRow(topActive) == FT_IN) ftInValue(input) else inputValue(input)
+
+    /** a value shown in the typed form of [unit] */
+    private fun inputFor(unit: String, v: Double): String =
+        if (unit == FT_IN) ftInInput(v) else plainNumber(v)
+
     fun textOf(top: Boolean): String {
-        if (topActive == top) return fmtInput(input)
-        val v = convertValue(cat, inputValue(input), unitOfRow(topActive), unitOfRow(top))
-        return fmtResult(v)
+        val u = unitOfRow(top)
+        if (topActive == top) return if (u == FT_IN) ftInTyped(input) else fmtInput(input)
+        val v = convertValue(cat, activeValue(), unitOfRow(topActive), u)
+        return if (u == FT_IN) ftInResult(v) else fmtResult(v)
     }
 
     /** tapping the other row: it becomes the one you type in, starting from its converted number */
     fun activate(top: Boolean) {
         if (topActive == top) return
-        val v = convertValue(cat, inputValue(input), unitOfRow(topActive), unitOfRow(top))
-        input = plainNumber(v)
+        val v = convertValue(cat, activeValue(), unitOfRow(topActive), unitOfRow(top))
+        input = inputFor(unitOfRow(top), v)
         topActive = top
     }
 
     fun setUnit(top: Boolean, key: String) {
+        val old = unitOfRow(top)
+        // the row being typed in changes to or from feet + inches: keep the same length, written the new way
+        if (top == topActive && old != key && (old == FT_IN || key == FT_IN)) {
+            input = inputFor(key, convertValue(cat, activeValue(), old, key))
+        }
         if (top) topUnit = key else bottomUnit = key
     }
 
     fun press(key: String) {
-        input = convPress(input, key)
+        if (unitOfRow(topActive) != FT_IN) {
+            input = convPress(input, key)
+            return
+        }
+        // feet + inches: the dot separates feet from inches (5.7 = 5 ft 7 in)
+        input = when (key) {
+            "AC" -> "0"
+            "⌫" -> input.dropLast(1).let { if (it.isEmpty()) "0" else it }
+            "." -> if (input.contains('.')) input else "$input."
+            else -> {
+                val dot = input.indexOf('.')
+                when {
+                    dot >= 0 && input.length - dot - 1 >= 2 -> input
+                    dot < 0 && input.length >= 5 -> input
+                    input == "0" -> key
+                    else -> input + key
+                }
+            }
+        }
     }
 }
 

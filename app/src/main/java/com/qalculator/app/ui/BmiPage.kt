@@ -42,18 +42,22 @@ import java.util.Locale
 
 /*
  * BMI page: age, gender, height (cm), weight (kg), a short note, and the green Calculate button.
- * The result (BMI number and category) is shown in green.
+ * The result (BMI number and category) is colored by category.
  */
 
 private val ChipOff = Color(0xFF2C2C2E)
 private val ChipOn = Color(0xFF14401D)
 private val IconOff = Color(0xFF8E8E93)
 
-private fun bmiCategory(bmi: Double): String = when {
-    bmi < 18.5 -> "Underweight"
-    bmi < 25.0 -> "Normal weight"
-    bmi < 30.0 -> "Overweight"
-    else -> "Obese"
+private class BmiClass(val name: String, val color: Color)
+
+private fun bmiClass(bmi: Double): BmiClass = when {
+    bmi < 18.5 -> BmiClass("Underweight", Color(0xFF42A5F5))
+    bmi < 25.0 -> BmiClass("Normal", Color(0xFF4CAF50))
+    bmi < 30.0 -> BmiClass("Overweight", Color(0xFFFF9800))
+    bmi < 35.0 -> BmiClass("Obese Class I", Color(0xFFF44336))
+    bmi < 40.0 -> BmiClass("Obese Class II", Color(0xFFD32F2F))
+    else -> BmiClass("Obese Class III", Color(0xFF9C27B0))
 }
 
 @Composable
@@ -65,7 +69,7 @@ fun BmiPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var height by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
     var bmiText by remember { mutableStateOf<String?>(null) }
-    var category by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf<BmiClass?>(null) }
 
     fun calculate() {
         val h = height.toDoubleOrNull()
@@ -78,7 +82,7 @@ fun BmiPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
         val m = h / 100.0
         val bmi = w / (m * m)
         bmiText = String.format(Locale.US, "%.1f", bmi)
-        category = bmiCategory(bmi)
+        category = bmiClass(bmi)
     }
 
     Column(
@@ -137,10 +141,11 @@ fun BmiPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
             BmiField("Weight (kg)", weight, { weight = it }, true)
             Spacer(Modifier.height(28.dp))
             val r = bmiText
-            if (r != null) {
+            val cls = category
+            if (r != null && cls != null) {
                 BasicText("Your BMI", style = qStylePx(14f, 300, ConvLabelInk, lh = 1.3f))
-                BasicText(r, style = qStylePx(48f, 300, Q.KeyGreen, lh = 1.15f), maxLines = 1)
-                BasicText(category, style = qStylePx(18f, 400, Q.KeyGreen, lh = 1.3f), maxLines = 1)
+                BasicText(r, style = qStylePx(48f, 300, cls.color, lh = 1.15f), maxLines = 1)
+                BasicText(cls.name, style = qStylePx(18f, 500, cls.color, lh = 1.3f), maxLines = 1)
                 Spacer(Modifier.height(24.dp))
             }
             BasicText("About BMI", style = qStylePx(15f, 300, ConvLabelInk, lh = 1.3f))
