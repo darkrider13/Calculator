@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import com.qalculator.app.ui.CalcController
 import com.qalculator.app.ui.CalcScreen
 import com.qalculator.app.ui.ConvertScreen
+import com.qalculator.app.ui.ConverterPage
+import com.qalculator.app.logic.ConvCategory
 import com.qalculator.app.ui.PricePage
 import com.qalculator.app.ui.LocalCompact
 import com.qalculator.app.ui.LocalViewportH
@@ -48,6 +50,7 @@ fun QalculatorApp(state: AppState) {
     val priceCtl = remember { PriceController(state) }
     var showConvert by remember { mutableStateOf(false) }
     var showPrice by remember { mutableStateOf(false) }
+    var converter by remember { mutableStateOf<ConvCategory?>(null) }
     // CSS px never follow the phone's font-size setting (the old WebView app ignored it too), so sp == dp here:
     // this keeps every fixed-height row from overlapping when the system font size is large
     val dens = LocalDensity.current
@@ -90,7 +93,19 @@ fun QalculatorApp(state: AppState) {
                                 ConvertScreen(
                                     onBack = { showConvert = false },
                                     onPrice = { showPrice = true },
-                                    backEnabled = !showPrice,
+                                    onConverter = { converter = it },
+                                    backEnabled = !showPrice && converter == null,
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .fillMaxHeight()
+                                        .widthIn(max = 460.dp)
+                                        .fillMaxWidth()
+                                )
+                            }
+                            converter?.let { cat ->
+                                ConverterPage(
+                                    cat = cat,
+                                    onBack = { converter = null },
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
                                         .fillMaxHeight()
