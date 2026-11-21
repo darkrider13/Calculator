@@ -54,23 +54,13 @@ import kotlinx.coroutines.delay
 /*
  * The price (dam hishab) page, in the same design as the converters: big title, rows with the typed numbers in white
  * (the row you type in has a soft box), the result in green, and the same keypad with the tall green AC / red backspace.
- * Reset, History and Save are on the top bar. Everything is saved in the same form / history as before.
  */
 
 @Composable
 fun PricePage(ctl: PriceController, onBack: () -> Unit, modifier: Modifier = Modifier) {
     val overlays = LocalOverlays.current
-    var showHist by remember { mutableStateOf(false) }
-    // back: an open unit menu closes first (its own handler), then the history, then this page
-    BackHandler(enabled = !overlays.anyOpen) { if (showHist) showHist = false else onBack() }
-
-    // the message on the save button goes back after 2 seconds
-    LaunchedEffect(ctl.flashSeq) {
-        if (ctl.flash != null) {
-            delay(2000)
-            ctl.clearFlash()
-        }
-    }
+    // back: an open unit menu closes first (its own handler), then this page
+    BackHandler(enabled = !overlays.anyOpen) { onBack() }
 
     val f = ctl.form
     val memo = remember(f) { memoOf(f) }
@@ -81,29 +71,6 @@ fun PricePage(ctl: PriceController, onBack: () -> Unit, modifier: Modifier = Mod
         priceMode && picked == "w" -> "amt"
         !priceMode && picked == "amt" -> "w"
         else -> picked
-    }
-
-    if (showHist) {
-        Column(modifier = modifier.fillMaxSize().background(Q.Black)) {
-            Row(
-                modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                PressBox(onClick = { showHist = false }, pressedScale = 0.92f, modifier = Modifier.size(48.dp)) {
-                    SvgIcon(Icons.Back, ConvTitleInk, Modifier.size(24.dp))
-                }
-            }
-            BasicText(
-                "Price history",
-                modifier = Modifier.padding(start = 26.dp, end = 16.dp, top = 14.dp, bottom = 12.dp),
-                style = qStylePx(34f, 300, ConvTitleInk, lh = 1.2f),
-                maxLines = 1
-            )
-            Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp)) {
-                HistBox(ctl, overlays, onReused = { showHist = false })
-            }
-        }
-        return
     }
 
     fun valueOf(id: String) = when (id) {
@@ -130,7 +97,7 @@ fun PricePage(ctl: PriceController, onBack: () -> Unit, modifier: Modifier = Mod
             .fillMaxSize()
             .background(Q.Black)
     ) {
-        // top bar: back, then reset / history / save
+        // top bar: back
         Row(
             modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -138,38 +105,14 @@ fun PricePage(ctl: PriceController, onBack: () -> Unit, modifier: Modifier = Mod
             PressBox(onClick = onBack, pressedScale = 0.92f, modifier = Modifier.size(48.dp)) {
                 SvgIcon(Icons.Back, ConvTitleInk, Modifier.size(24.dp))
             }
-            Spacer(Modifier.weight(1f))
-            PressBox(onClick = { ctl.reset() }, pressedScale = 0.92f, modifier = Modifier.size(44.dp)) {
-                SvgIcon(Icons.Reset, ConvLabelInk, Modifier.size(22.dp))
-            }
-            PressBox(onClick = { showHist = true }, pressedScale = 0.92f, modifier = Modifier.size(44.dp)) {
-                SvgIcon(Icons.Clock, ConvLabelInk, Modifier.size(22.dp))
-            }
-            PressBox(
-                onClick = { ctl.save() },
-                enabled = memo.ok,
-                pressedScale = 0.95f,
-                modifier = Modifier
-                    .heightIn(min = 44.dp)
-                    .graphicsLayer { alpha = if (memo.ok) 1f else 0.35f },
-                contentPadding = PaddingValues(horizontal = 12.dp)
-            ) {
-                BasicText(
-                    ctl.flash ?: "Save",
-                    style = qStylePx(16f, 600, Q.KeyGreen, lh = 1.2f),
-                    maxLines = 1,
-                    softWrap = false
-                )
-            }
         }
         BasicText(
             "Price converter",
-            modifier = Modifier.padding(start = 26.dp, end = 16.dp, top = 14.dp),
+            modifier = Modifier.padding(start = 26.dp, end = 16.dp, top = 14.dp, bottom = 12.dp),
             style = qStylePx(34f, 300, ConvTitleInk, lh = 1.2f),
             maxLines = 1,
             overflow = TextOverflow.Clip
         )
-        ItemNameField(f.item) { ctl.setField("item", it) }
         // the two ways of working it out
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 26.dp, vertical = 6.dp),
@@ -221,39 +164,6 @@ fun PricePage(ctl: PriceController, onBack: () -> Unit, modifier: Modifier = Mod
 @Composable
 private fun Symbol(s: String) {
     BasicText(s, style = qStylePx(26f, 400, Color(0xFFF2F2F2), lh = 1.2f), maxLines = 1, softWrap = false)
-}
-
-/** the optional item name: a plain line with a thin line under it */
-@Composable
-private fun ItemNameField(value: String, onChange: (String) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(start = 26.dp, end = 26.dp, top = 6.dp)) {
-        BasicTextField(
-            value = value,
-            onValueChange = { if (it.length <= 60) onChange(it) },
-            singleLine = true,
-            textStyle = qStylePx(18f, 300, Color.White, lh = 1.2f),
-            cursorBrush = SolidColor(Q.Cursor),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { }),
-            modifier = Modifier.fillMaxWidth(),
-            decorationBox = { inner ->
-                Box(
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    if (value.isEmpty()) {
-                        BasicText(
-                            "Item name (optional)",
-                            style = qStylePx(18f, 300, ConvLabelInk.copy(alpha = 0.7f), lh = 1.2f),
-                            maxLines = 1
-                        )
-                    }
-                    inner()
-                }
-            }
-        )
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(ConvDivider))
-    }
 }
 
 /** the round switch button: the chosen one is a dark pill with green text */

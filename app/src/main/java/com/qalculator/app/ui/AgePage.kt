@@ -101,7 +101,7 @@ fun AgePage(onBack: () -> Unit, modifier: Modifier = Modifier) {
         }
         BasicText(
             "Age calculator",
-            modifier = Modifier.padding(start = 26.dp, end = 16.dp, top = 14.dp),
+            modifier = Modifier.padding(start = 26.dp, end = 16.dp, top = 14.dp, bottom = 16.dp),
             style = qStylePx(34f, 300, ConvTitleInk, lh = 1.2f),
             maxLines = 1,
             overflow = TextOverflow.Clip

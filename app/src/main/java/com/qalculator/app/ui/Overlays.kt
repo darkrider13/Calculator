@@ -20,6 +20,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -170,6 +171,12 @@ private fun Modifier.glass(radius: Float, bg: Color? = null): Modifier = this
         drawTopHighlight(r, bw, Q.HlGlass)
     }
 
+/** the flat card used by the confirm dialog: the same colour and corner as the cards of the converter pages */
+private fun Modifier.flatCard(radius: Float): Modifier = this
+    .drawBehind {
+        drawRoundRect(color = Q.AccentSoft, cornerRadius = CornerRadius(radius * density))
+    }
+
 /**
  * Puts the app content and, above it, the confirm dialog / unit menu.
  * While one is open the content behind is blurred and darkened (backdrop-filter in the original).
@@ -221,7 +228,7 @@ private fun ConfirmDialog(req: ConfirmRequest, onClose: () -> Unit) {
                     scaleX = s
                     scaleY = s
                 }
-                .glass(16f)
+                .flatCard(18f)
                 .clickable(interactionSource = boxSource, indication = null, onClick = {})
                 .padding(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 12.dp)
         ) {
@@ -280,10 +287,22 @@ private fun CfmButton(text: String, yes: Boolean, onClick: () -> Unit) {
     }
 }
 
-/** one row of the unit menu is this tall, so exactly 4 whole rows fit the box and no card is ever cut */
+/** one row of the unit menu is this tall; the box is always made of WHOLE rows, so no card is ever cut */
 private val MenuRowH = 52.dp
 private val MenuGap = 4.dp
+/** the glass box padding (same on top and bottom) and the free space kept above/below the box on short screens */
+private val MenuPad = 10.dp
+private val MenuScreenMargin = 24.dp
+/** at most this many rows are visible at once, more options scroll inside the box */
 private const val MenuShown = 4
+
+/** how many whole rows fit: min(options, 4, what the screen height allows), never less than 1 */
+private fun menuRows(options: Int, availableH: androidx.compose.ui.unit.Dp): Int {
+    val pitch = MenuRowH + MenuGap
+    val room = availableH - MenuPad * 2 - MenuScreenMargin * 2 + MenuGap
+    val byScreen = Math.max(1, (room / pitch).toInt())
+    return Math.max(1, Math.min(Math.min(options, MenuShown), byScreen))
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -295,32 +314,34 @@ private fun UnitMenu(req: MenuRequest, onClose: () -> Unit) {
     val bdSource = remember { MutableInteractionSource() }
     val menuSource = remember { MutableInteractionSource() }
     val n = req.options.size
-    val shown = Math.min(n, MenuShown)
-    val listH = MenuRowH * shown + MenuGap * (shown - 1)
-    // opens with the chosen unit visible; the list always settles on whole rows
-    val firstIdx = Math.max(0, Math.min(req.options.indexOfFirst { it.first == req.selected }, n - MenuShown))
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = firstIdx)
-    val snap = rememberSnapFlingBehavior(listState)
-    // when the scrolling stops half way through a row, settle on a whole row (the box never shows a cut card)
     val pitchPx = with(LocalDensity.current) { (MenuRowH + MenuGap).toPx() }
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }.collect { moving ->
-            if (!moving) {
-                val off = listState.firstVisibleItemScrollOffset
-                if (off != 0) {
-                    val idx = listState.firstVisibleItemIndex
-                    val t = if (off > pitchPx / 2f) idx + 1 else idx
-                    listState.animateScrollToItem(Math.min(t, Math.max(0, n - MenuShown)))
-                }
-            }
-        }
-    }
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .drawBehind { drawRect(Q.Scrim.copy(alpha = Q.Scrim.alpha * fade.value)) }
             .clickable(interactionSource = bdSource, indication = null, onClick = onClose)
     ) {
+        // 1 option -> 1 row, 2 -> 2 rows, 3 -> 3 rows, 4 or more -> 4 rows (the rest scrolls)
+        val shown = menuRows(n, maxHeight)
+        val listH = MenuRowH * shown + MenuGap * (shown - 1)
+        val maxFirst = Math.max(0, n - shown)
+        // opens with the chosen unit visible; the list always settles on whole rows
+        val firstIdx = Math.max(0, Math.min(req.options.indexOfFirst { it.first == req.selected }, maxFirst))
+        val listState = rememberLazyListState(initialFirstVisibleItemIndex = firstIdx)
+        val snap = rememberSnapFlingBehavior(listState)
+        // when the scrolling stops half way through a row, settle on a whole row (the box never shows a cut card)
+        LaunchedEffect(listState, maxFirst) {
+            snapshotFlow { listState.isScrollInProgress }.collect { moving ->
+                if (!moving) {
+                    val off = listState.firstVisibleItemScrollOffset
+                    if (off != 0) {
+                        val idx = listState.firstVisibleItemIndex
+                        val t = if (off > pitchPx / 2f) idx + 1 else idx
+                        listState.animateScrollToItem(Math.min(t, maxFirst))
+                    }
+                }
+            }
+        }
         Column(
             modifier = Modifier
                 .layout { measurable, constraints ->
@@ -342,11 +363,12 @@ private fun UnitMenu(req: MenuRequest, onClose: () -> Unit) {
                 }
                 .glass(18f, blackGlassBg)
                 .clickable(interactionSource = menuSource, indication = null, onClick = {})
-                .padding(10.dp)
+                .padding(MenuPad)
         ) {
             LazyColumn(
                 state = listState,
                 flingBehavior = snap,
+                userScrollEnabled = n > shown,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(listH),
