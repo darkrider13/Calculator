@@ -1,6 +1,7 @@
 package com.qalculator.app.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,7 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -41,7 +46,8 @@ import java.util.Locale
  */
 
 private val ChipOff = Color(0xFF2C2C2E)
-private val ChipOn = Color(0xFF1F3A25)
+private val ChipOn = Color(0xFF14401D)
+private val IconOff = Color(0xFF8E8E93)
 
 private fun bmiCategory(bmi: Double): String = when {
     bmi < 18.5 -> "Underweight"
@@ -120,8 +126,8 @@ fun BmiPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     )
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        GenderChip("Male", male) { male = true }
-                        GenderChip("Female", !male) { male = false }
+                        GenderChip(false, male) { male = true }
+                        GenderChip(true, !male) { male = false }
                     }
                 }
             }
@@ -161,17 +167,43 @@ fun BmiPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
+/** the rounded square with the person icon: green background and bright green icon when chosen */
 @Composable
-private fun GenderChip(label: String, on: Boolean, onClick: () -> Unit) {
+private fun GenderChip(female: Boolean, on: Boolean, onClick: () -> Unit) {
     PressBox(
         onClick = onClick,
         pressedScale = 0.94f,
         modifier = Modifier
-            .heightIn(min = 40.dp)
-            .background(if (on) ChipOn else ChipOff, RoundedCornerShape(12.dp)),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp)
+            .size(width = 64.dp, height = 72.dp)
+            .background(if (on) ChipOn else ChipOff, RoundedCornerShape(16.dp))
     ) {
-        BasicText(label, style = qStylePx(14f, 500, if (on) Q.KeyGreen else ConvLabelInk, lh = 1.2f))
+        GenderIcon(female, if (on) Q.KeyGreen else IconOff, Modifier.size(width = 26.dp, height = 38.dp))
+    }
+}
+
+/** a filled person (man) or a person in a dress (woman) */
+@Composable
+private fun GenderIcon(female: Boolean, color: Color, modifier: Modifier) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        drawCircle(color, radius = w * 0.2f, center = Offset(w * 0.5f, h * 0.17f))
+        if (!female) {
+            drawRoundRect(color, Offset(w * 0.1f, h * 0.38f), Size(w * 0.8f, h * 0.34f), CornerRadius(w * 0.14f))
+            drawRoundRect(color, Offset(w * 0.28f, h * 0.66f), Size(w * 0.44f, h * 0.34f), CornerRadius(w * 0.07f))
+        } else {
+            drawCircle(color, radius = w * 0.11f, center = Offset(w * 0.27f, h * 0.2f))
+            drawCircle(color, radius = w * 0.11f, center = Offset(w * 0.73f, h * 0.2f))
+            val dress = Path().apply {
+                moveTo(w * 0.32f, h * 0.38f)
+                lineTo(w * 0.68f, h * 0.38f)
+                lineTo(w * 0.96f, h * 0.84f)
+                lineTo(w * 0.04f, h * 0.84f)
+                close()
+            }
+            drawPath(dress, color)
+            drawRoundRect(color, Offset(w * 0.34f, h * 0.8f), Size(w * 0.32f, h * 0.2f), CornerRadius(w * 0.05f))
+        }
     }
 }
 

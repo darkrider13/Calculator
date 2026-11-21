@@ -122,6 +122,10 @@ private val canBlur: Boolean get() = Build.VERSION.SDK_INT >= 31
 private val glassBg: Color
     get() = if (canBlur) rgba(40, 46, 60, 0.45f) else rgba(40, 46, 60, 0.94f)
 
+/** soft black glass for the unit menus (blur behind on Android 12+, a more solid black on older phones) */
+private val blackGlassBg: Color
+    get() = if (canBlur) rgba(8, 8, 10, 0.62f) else rgba(12, 12, 14, 0.96f)
+
 /** box-shadow: 0 12px 40px rgba(0,0,0,.45) around a rounded box (outside only) */
 private fun Modifier.glassShadow(radius: Float): Modifier = this.drawBehind {
     if (Build.VERSION.SDK_INT < 28) return@drawBehind
@@ -141,12 +145,12 @@ private fun Modifier.glassShadow(radius: Float): Modifier = this.drawBehind {
 }
 
 /** the glass box used by the dialog and the menu */
-private fun Modifier.glass(radius: Float): Modifier = this
+private fun Modifier.glass(radius: Float, bg: Color? = null): Modifier = this
     .glassShadow(radius)
     .drawBehind {
         val r = radius * density
         val bw = density
-        drawRoundRect(color = glassBg, cornerRadius = CornerRadius(r))
+        drawRoundRect(color = bg ?: glassBg, cornerRadius = CornerRadius(r))
         drawRoundRect(
             color = Q.GlassBorder,
             topLeft = Offset(bw / 2f, bw / 2f),
@@ -286,34 +290,22 @@ private fun UnitMenu(req: MenuRequest, onClose: () -> Unit) {
         Column(
             modifier = Modifier
                 .layout { measurable, constraints ->
-                    // same placing rules as the original openMenu()
-                    val gap = 6.dp.roundToPx()
-                    val margin = 8.dp.roundToPx()
-                    val minW = Math.min(
-                        Math.max(140.dp.roundToPx(), Math.round(req.anchor.width)),
-                        constraints.maxWidth
-                    )
+                    // the menu opens in the middle of the screen
+                    val minW = Math.min(220.dp.roundToPx(), constraints.maxWidth)
+                    val maxW = Math.min(320.dp.roundToPx(), constraints.maxWidth - 48.dp.roundToPx())
                     val p = measurable.measure(
                         Constraints(
                             minWidth = minW,
-                            maxWidth = constraints.maxWidth,
+                            maxWidth = Math.max(minW, maxW),
                             minHeight = 0,
                             maxHeight = constraints.maxHeight
                         )
                     )
-                    val aTop = req.anchor.top - origin.y
-                    val aBottom = req.anchor.bottom - origin.y
-                    val aLeft = req.anchor.left - origin.x
-                    var top = aBottom + gap
-                    if (top + p.height > constraints.maxHeight - margin) {
-                        top = Math.max(margin.toFloat(), aTop - gap - p.height)
-                    }
-                    val left = Math.min(
-                        Math.max(margin.toFloat(), aLeft),
-                        (constraints.maxWidth - p.width - margin).toFloat()
-                    )
                     layout(constraints.maxWidth, constraints.maxHeight) {
-                        p.place(Math.round(left), Math.round(top))
+                        p.place(
+                            (constraints.maxWidth - p.width) / 2,
+                            (constraints.maxHeight - p.height) / 2
+                        )
                     }
                 }
                 .graphicsLayer {
@@ -322,11 +314,12 @@ private fun UnitMenu(req: MenuRequest, onClose: () -> Unit) {
                     scaleX = s
                     scaleY = s
                 }
-                .glass(16f)
+                .glass(16f, blackGlassBg)
                 .clickable(interactionSource = menuSource, indication = null, onClick = {})
                 .width(IntrinsicSize.Max)
+                // 4 rows are shown (4 x 44dp + 3 gaps of 2dp + 6dp padding top and bottom), the rest scrolls
+                .heightIn(max = 194.dp)
                 .padding(6.dp)
-                // long lists (the converter units) scroll when they do not fit the screen
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
