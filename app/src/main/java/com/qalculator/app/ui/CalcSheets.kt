@@ -104,7 +104,7 @@ private fun SheetHead(title: String, onBack: () -> Unit, trailing: @Composable (
         }
         BasicText(
             text = title,
-            style = qStyle(1.05f, 700, Q.Ink),
+            style = qStyle(1.05f, 700, Q.KeyGreen),
             modifier = Modifier.weight(1f)
         )
         trailing()
@@ -255,7 +255,7 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit, onDele
                 ) {
                     BasicText(
                         text = dispExpr(e.expr),
-                        style = qStyle(0.88f, 400, Q.Muted, lh = 1.35f, tnum = true, align = TextAlign.Start),
+                        style = qStyle(0.88f, 400, Color.White, lh = 1.35f, tnum = true, align = TextAlign.Start),
                         maxLines = 1,
                         softWrap = false,
                         overflow = TextOverflow.Ellipsis,
@@ -265,7 +265,7 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit, onDele
                     )
                     BasicText(
                         text = "= " + numE(e.result, 6),
-                        style = qStyle(0.95f, 700, Q.Ink, tnum = true),
+                        style = qStyle(0.95f, 700, Q.KeyGreen, tnum = true),
                         maxLines = 1,
                         softWrap = false,
                         modifier = Modifier
@@ -293,7 +293,7 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit, onDele
                         modifier = Modifier.heightIn(min = 32.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
-                        BasicText("ব্যবহার", style = qStyle(0.85f, 600, Q.Accent))
+                        BasicText("ব্যবহার", style = qStyle(0.85f, 600, Q.KeyGreen))
                     }
                     PressBox(onClick = onDelete, modifier = Modifier.size(width = 26.dp, height = 20.dp)) {
                         SvgIcon(Icons.Trash, TrashRed, Modifier.size(13.dp))
