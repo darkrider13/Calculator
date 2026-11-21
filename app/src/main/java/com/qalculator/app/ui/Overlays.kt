@@ -78,7 +78,9 @@ class ConfirmRequest(
     val yesLabel: String,
     val onYes: () -> Unit,
     /** info only: no "No" button, just one green button in the middle */
-    val infoOnly: Boolean = false
+    val infoOnly: Boolean = false,
+    /** false = the "No" button is hidden, only the yes button stays (tap outside to dismiss) */
+    val showNo: Boolean = true
 )
 
 /** The unit menu: where the button is on screen, the choices, the chosen one, what to do on pick */
@@ -99,9 +101,9 @@ class Overlays {
 
     val anyOpen: Boolean get() = confirm != null || menu != null
 
-    fun askConfirm(title: String, message: String, yesLabel: String, infoOnly: Boolean = false, onYes: () -> Unit) {
+    fun askConfirm(title: String, message: String, yesLabel: String, infoOnly: Boolean = false, showNo: Boolean = true, onYes: () -> Unit) {
         menu = null
-        confirm = ConfirmRequest(title, message, yesLabel, onYes, infoOnly)
+        confirm = ConfirmRequest(title, message, yesLabel, onYes, infoOnly, showNo)
     }
 
     fun closeConfirm() {
@@ -228,6 +230,7 @@ private fun ConfirmDialog(req: ConfirmRequest, onClose: () -> Unit) {
     LaunchedEffect(Unit) { pop.animateTo(1f, tween(200, easing = CssEase)) }
     val noSource = remember { MutableInteractionSource() }
     val boxSource = remember { MutableInteractionSource() }
+    val single = req.infoOnly || !req.showNo
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -262,9 +265,9 @@ private fun ConfirmDialog(req: ConfirmRequest, onClose: () -> Unit) {
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = if (req.infoOnly) Arrangement.Center else Arrangement.SpaceBetween
+                horizontalArrangement = if (single) Arrangement.Center else Arrangement.SpaceBetween
             ) {
-                if (!req.infoOnly) CfmButton(text = "No", yes = false, onClick = onClose)
+                if (!single) CfmButton(text = "No", yes = false, onClick = onClose)
                 CfmButton(text = req.yesLabel, yes = true, green = req.infoOnly, onClick = {
                     onClose()
                     req.onYes()

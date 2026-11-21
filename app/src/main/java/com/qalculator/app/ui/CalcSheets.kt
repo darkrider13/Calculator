@@ -135,7 +135,8 @@ fun CalcHistorySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                         overlays.askConfirm(
                             "Delete all calculations?",
                             "All calculator history will be deleted. This cannot be undone.",
-                            "Yes, delete"
+                            "Yes, delete",
+                            showNo = false
                         ) { ctl.clearEntries() }
                     },
                     modifier = Modifier.size(width = 36.dp, height = 32.dp)
@@ -582,7 +583,7 @@ private fun VCurrent(ctl: CalcController, view: VView, modifier: Modifier) {
             if (!editing) {
                 // fitNum(): shrink a long number so it stays on one line
                 val avail = boxW - 22f * density.density
-                var fs = 40f
+                var fs = 48f
                 var style = qStylePx(fs, 700, Q.Ink, lh = 1.15f, tnum = true, align = TextAlign.Center)
                 var w = measurer.measure(view.num, style, softWrap = false).size.width
                 if (w > 0 && avail > 0f) {
@@ -663,8 +664,8 @@ private fun VTile(label: String, value: String, modifier: Modifier) {
     Column(
         modifier = modifier
             .panel(Q.Black, 18.dp)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+            .padding(horizontal = 14.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         BasicText(label, style = qStyle(0.78f, 400, Q.Muted), maxLines = 1, softWrap = false)
         BasicText(value, style = qStyle(1.3f, 600, Q.Ink, tnum = true), maxLines = 1, softWrap = false)
@@ -678,7 +679,7 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
     val editing = ctl.vEditing
     val state = rememberScrollState()
     val pos = view.pos.split(" / ")
-    val posText = if (pos.size == 2) "Number " + pos[0] + " of " + pos[1] else view.pos
+    val posText = if (pos.size == 2) pos[0] + " of " + pos[1] else view.pos
     val tiles = view.tot.filter { !it.ok && it.value != null }
     val allOk = view.tot.any { it.ok }
     Column(
@@ -686,7 +687,7 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
             .fillMaxSize()
             .blockTouches()
             .verticalScroll(state),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         SheetHead("Verify", onBack = { ctl.vBack() })
         VSum(ctl, view)
@@ -695,8 +696,8 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .panel(Q.Black, 22.dp)
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
@@ -716,10 +717,10 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                                 "Remove"
                             ) { ctl.vDeleteNumber() }
                         },
-                        modifier = Modifier.heightIn(min = 28.dp),
-                        contentPadding = PaddingValues(horizontal = 4.dp)
+                        modifier = Modifier.heightIn(min = 32.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp)
                     ) {
-                        BasicText("Remove", style = qStyle(0.85f, 700, Q.Bad))
+                        SvgIcon(Icons.Trash, TrashRed, Modifier.size(22.dp))
                     }
                 }
             }
@@ -730,9 +731,9 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                VArrow("‹", { ctl.vStepBy(-1) }, Modifier.fillMaxHeight().heightIn(min = 60.dp))
+                VArrow("‹", { ctl.vStepBy(-1) }, Modifier.fillMaxHeight().heightIn(min = 84.dp))
                 VCurrent(ctl, view, Modifier.weight(1f).fillMaxHeight())
-                VArrow("›", { ctl.vStepBy(1) }, Modifier.fillMaxHeight().heightIn(min = 60.dp))
+                VArrow("›", { ctl.vStepBy(1) }, Modifier.fillMaxHeight().heightIn(min = 84.dp))
             }
             if (!editing) {
                 BasicText(
