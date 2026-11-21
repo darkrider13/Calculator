@@ -8,6 +8,13 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -271,19 +278,30 @@ private fun CfmButton(text: String, yes: Boolean, onClick: () -> Unit) {
     }
 }
 
+/** one row of the unit menu is this tall, so exactly 4 whole rows fit the box and no card is ever cut */
+private val MenuRowH = 52.dp
+private val MenuGap = 4.dp
+private const val MenuShown = 4
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun UnitMenu(req: MenuRequest, onClose: () -> Unit) {
     val fade = remember { Animatable(0f) }
     val pop = remember { Animatable(0f) }
     LaunchedEffect(Unit) { fade.animateTo(1f, tween(180, easing = CssEase)) }
     LaunchedEffect(Unit) { pop.animateTo(1f, tween(160, easing = CssEase)) }
-    var origin by remember { mutableStateOf(Offset.Zero) }
     val bdSource = remember { MutableInteractionSource() }
     val menuSource = remember { MutableInteractionSource() }
+    val n = req.options.size
+    val shown = Math.min(n, MenuShown)
+    val listH = MenuRowH * shown + MenuGap * (shown - 1)
+    // opens with the chosen unit visible; the list always settles on whole rows
+    val firstIdx = Math.max(0, Math.min(req.options.indexOfFirst { it.first == req.selected }, n - MenuShown))
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = firstIdx)
+    val snap = rememberSnapFlingBehavior(listState)
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .onGloballyPositioned { origin = it.positionInWindow() }
             .drawBehind { drawRect(Q.Scrim.copy(alpha = Q.Scrim.alpha * fade.value)) }
             .clickable(interactionSource = bdSource, indication = null, onClick = onClose)
     ) {
@@ -291,16 +309,8 @@ private fun UnitMenu(req: MenuRequest, onClose: () -> Unit) {
             modifier = Modifier
                 .layout { measurable, constraints ->
                     // the menu opens in the middle of the screen
-                    val minW = Math.min(220.dp.roundToPx(), constraints.maxWidth)
-                    val maxW = Math.min(320.dp.roundToPx(), constraints.maxWidth - 48.dp.roundToPx())
-                    val p = measurable.measure(
-                        Constraints(
-                            minWidth = minW,
-                            maxWidth = Math.max(minW, maxW),
-                            minHeight = 0,
-                            maxHeight = constraints.maxHeight
-                        )
-                    )
+                    val w = Math.min(320.dp.roundToPx(), constraints.maxWidth - 40.dp.roundToPx())
+                    val p = measurable.measure(Constraints.fixedWidth(w))
                     layout(constraints.maxWidth, constraints.maxHeight) {
                         p.place(
                             (constraints.maxWidth - p.width) / 2,
@@ -314,40 +324,46 @@ private fun UnitMenu(req: MenuRequest, onClose: () -> Unit) {
                     scaleX = s
                     scaleY = s
                 }
-                .glass(16f, blackGlassBg)
+                .glass(18f, blackGlassBg)
                 .clickable(interactionSource = menuSource, indication = null, onClick = {})
-                .width(IntrinsicSize.Max)
-                // 4 rows are shown (4 x 44dp + 3 gaps of 2dp + 6dp padding top and bottom), the rest scrolls
-                .heightIn(max = 194.dp)
-                .padding(6.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+                .padding(10.dp)
         ) {
-            for (opt in req.options) {
-                val on = opt.first == req.selected
-                PressBox(
-                    onClick = {
-                        onClose()
-                        req.onPick(opt.first)
-                    },
-                    contentAlignment = Alignment.CenterStart,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 44.dp)
-                        .then(if (on) Modifier.background(Q.GlassSel, RoundedCornerShape(11.dp)) else Modifier),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+            LazyColumn(
+                state = listState,
+                flingBehavior = snap,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(listH),
+                verticalArrangement = Arrangement.spacedBy(MenuGap)
+            ) {
+                items(req.options, key = { it.first }) { opt ->
+                    val on = opt.first == req.selected
+                    PressBox(
+                        onClick = {
+                            onClose()
+                            req.onPick(opt.first)
+                        },
+                        contentAlignment = Alignment.CenterStart,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(MenuRowH)
+                            .then(if (on) Modifier.background(Q.GlassSel, RoundedCornerShape(12.dp)) else Modifier),
+                        contentPadding = PaddingValues(horizontal = 14.dp)
                     ) {
-                        BasicText(
-                            text = opt.second,
-                            modifier = Modifier.weight(1f),
-                            style = qStylePx(15f, 600, Q.Ink, align = TextAlign.Left)
-                        )
-                        if (on) SvgIcon(Icons.Check, Q.Accent, Modifier.size(18.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            BasicText(
+                                text = opt.second,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = qStylePx(16f, 600, Q.Ink, align = TextAlign.Left)
+                            )
+                            if (on) SvgIcon(Icons.Check, Q.Accent, Modifier.size(18.dp))
+                        }
                     }
                 }
             }
