@@ -41,7 +41,7 @@ import com.qalculator.app.ui.FloatCalc
 object FloatLauncher {
     fun open(ctx: Context) {
         if (!Settings.canDrawOverlays(ctx)) {
-            Toast.makeText(ctx, "\"অন্য অ্যাপের ওপরে দেখান\" চালু করে আবার চাপো", Toast.LENGTH_LONG).show()
+            Toast.makeText(ctx, "Turn on \"Display over other apps\" and tap again", Toast.LENGTH_LONG).show()
             val i = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + ctx.packageName))
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             try {
@@ -165,7 +165,7 @@ class FloatService : Service() {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= 26) {
             nm.createNotificationChannel(
-                NotificationChannel(CHANNEL, "ভাসমান ক্যালকুলেটর", NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CHANNEL, "Floating calculator", NotificationManager.IMPORTANCE_LOW)
             )
         }
         val open = PendingIntent.getActivity(
@@ -180,10 +180,10 @@ class FloatService : Service() {
         )
         val n: Notification = NotificationCompat.Builder(this, CHANNEL)
             .setSmallIcon(android.R.drawable.ic_menu_edit)
-            .setContentTitle("ক্যালকুলেটর চলছে")
-            .setContentText("ভাসমান ক্যালকুলেটর অন্য অ্যাপের ওপরে আছে")
+            .setContentTitle("Calculator is running")
+            .setContentText("Floating calculator is over other apps")
             .setContentIntent(open)
-            .addAction(0, "বন্ধ করো", stop)
+            .addAction(0, "Close", stop)
             .setOngoing(true)
             .build()
         if (Build.VERSION.SDK_INT >= 34) {

@@ -62,12 +62,12 @@ object Updater {
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, info.apkName)
             (ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(req)
-            Toast.makeText(ctx, "ডাউনলোড শুরু হয়েছে। শেষ হলে নোটিফিকেশনে চাপ দিয়ে ইনস্টল করুন।", Toast.LENGTH_LONG).show()
+            Toast.makeText(ctx, "Download started. When it finishes, tap the notification to install.", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             try {
                 ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.apkUrl)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             } catch (e2: Exception) {
-                Toast.makeText(ctx, "ডাউনলোড শুরু করা যায়নি", Toast.LENGTH_LONG).show()
+                Toast.makeText(ctx, "Could not start the download", Toast.LENGTH_LONG).show()
             }
         }
     }
