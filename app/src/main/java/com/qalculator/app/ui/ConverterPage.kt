@@ -365,7 +365,7 @@ internal fun ConvKeypad(signed: Boolean, onKey: (String) -> Unit, modifier: Modi
             if (signed) {
                 // temperature: plain keys, one per row
                 SideKey(Modifier.weight(1f).fillMaxWidth(), { onKey("AC") }) { AcText() }
-                SideKey(Modifier.weight(1f).fillMaxWidth(), { onKey("⌫") }) { BackIcon() }
+                SideKey(Modifier.weight(1f).fillMaxWidth(), { onKey("⌫") }, { onKey("AC") }) { BackIcon() }
                 SideKey(Modifier.weight(1f).fillMaxWidth(), { onKey("±") }) {
                     SvgIcon(PlusMinusIcon, ConvOrange, Modifier.size(28.dp))
                 }
@@ -383,7 +383,7 @@ internal fun ConvKeypad(signed: Boolean, onKey: (String) -> Unit, modifier: Modi
                         .weight(1f)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) { Pill({ onKey("⌫") }) { BackIcon() } }
+                ) { Pill({ onKey("⌫") }, { onKey("AC") }) { BackIcon() } }
             }
         }
     }
@@ -406,15 +406,23 @@ private fun DigitKey(k: String, modifier: Modifier, onKey: (String) -> Unit) {
 }
 
 @Composable
-private fun SideKey(modifier: Modifier, onClick: () -> Unit, content: @Composable () -> Unit) {
-    PressBox(onClick = onClick, pressedScale = 0.88f, modifier = modifier) { content() }
+private fun SideKey(modifier: Modifier, onClick: () -> Unit, onLongClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
+    val haptic = LocalHapticFeedback.current
+    PressBox(
+        onClick = onClick,
+        onLongClick = onLongClick?.let { { haptic.performHapticFeedback(HapticFeedbackType.LongPress); it() } },
+        pressedScale = 0.88f,
+        modifier = modifier
+    ) { content() }
 }
 
 /** the tall dark button (AC / backspace) */
 @Composable
-private fun Pill(onClick: () -> Unit, content: @Composable () -> Unit) {
+private fun Pill(onClick: () -> Unit, onLongClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
+    val haptic = LocalHapticFeedback.current
     PressBox(
         onClick = onClick,
+        onLongClick = onLongClick?.let { { haptic.performHapticFeedback(HapticFeedbackType.LongPress); it() } },
         pressedScale = 0.95f,
         modifier = Modifier
             .fillMaxSize()

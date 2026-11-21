@@ -171,10 +171,26 @@ private fun Modifier.glass(radius: Float, bg: Color? = null): Modifier = this
         drawTopHighlight(r, bw, Q.HlGlass)
     }
 
-/** the flat card used by the confirm dialog: the same colour and corner as the cards of the converter pages */
-private fun Modifier.flatCard(radius: Float): Modifier = this
+/**
+ * The confirm dialog box: a deep near-black (not pure black) with a thin soft border and a shadow,
+ * so it sits on the blurred app behind it like a card of the same family, not a hole.
+ */
+private val DialogBg = Color(0xFF09090B)
+private val DialogBorder = rgba(255, 255, 255, 0.10f)
+
+private fun Modifier.darkCard(radius: Float): Modifier = this
+    .glassShadow(radius)
     .drawBehind {
-        drawRoundRect(color = Q.AccentSoft, cornerRadius = CornerRadius(radius * density))
+        val r = radius * density
+        val bw = density
+        drawRoundRect(color = DialogBg, cornerRadius = CornerRadius(r))
+        drawRoundRect(
+            color = DialogBorder,
+            topLeft = Offset(bw / 2f, bw / 2f),
+            size = Size(size.width - bw, size.height - bw),
+            cornerRadius = CornerRadius(r - bw / 2f),
+            style = Stroke(width = bw)
+        )
     }
 
 /**
@@ -228,7 +244,7 @@ private fun ConfirmDialog(req: ConfirmRequest, onClose: () -> Unit) {
                     scaleX = s
                     scaleY = s
                 }
-                .flatCard(18f)
+                .darkCard(20f)
                 .clickable(interactionSource = boxSource, indication = null, onClick = {})
                 .padding(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 12.dp)
         ) {

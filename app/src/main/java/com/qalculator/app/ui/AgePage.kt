@@ -45,12 +45,12 @@ import com.qalculator.app.logic.todayDigits
 
 private val DateDim = Color(0xFF4A4A4C)
 
-/** 05/11/1998 while typing: the typed digits in white, the missing ones as DD / MM / YYYY in dim gray */
+/** 05-11-1998 while typing: the typed digits in white, the missing ones as DD / MM / YYYY in dim gray */
 private fun dateText(d: String, typed: Color) = buildAnnotatedString {
     var idx = 0
-    for (c in "DD/MM/YYYY") {
-        if (c == '/') {
-            withStyle(SpanStyle(color = if (idx > 0 && idx <= d.length) typed else DateDim)) { append('/') }
+    for (c in "DD-MM-YYYY") {
+        if (c == '-') {
+            withStyle(SpanStyle(color = if (idx > 0 && idx <= d.length) typed else DateDim)) { append('-') }
         } else {
             if (idx < d.length) withStyle(SpanStyle(color = typed)) { append(d[idx]) }
             else withStyle(SpanStyle(color = DateDim)) { append(c) }

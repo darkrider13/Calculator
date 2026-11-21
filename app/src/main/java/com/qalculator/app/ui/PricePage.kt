@@ -241,7 +241,10 @@ private fun PriceRow(
 @Composable
 private fun ResultRow(v: com.qalculator.app.logic.MemoView, modifier: Modifier) {
     val vh = LocalViewportH.current.value
-    val totalSize = Math.min(Math.max(0.055f * vh, 30f), 42f)
+    // long totals shrink a little so the total always fits on one line
+    val len = v.main.length + (if (v.cur) 3 else 0) + (v.small?.let { it.length + 1 }?.let { (it * 0.6f).toInt() } ?: 0)
+    val baseSize = Math.min(Math.max(0.05f * vh, 28f), 40f)
+    val totalSize = if (len <= 11) baseSize else Math.max(22f, baseSize * 11f / len)
     val total = buildAnnotatedString {
         append(v.main)
         if (v.cur) withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append(TAKA_SUF) }
@@ -265,7 +268,8 @@ private fun ResultRow(v: com.qalculator.app.logic.MemoView, modifier: Modifier) 
         horizontalAlignment = Alignment.End
     ) {
         BasicText(
-            v.label + if (v.detail.isNotEmpty()) "  ·  " + v.detail else "",
+            // the "enter the shop rate first" hints are not shown: only the label (and the detail once there is a total)
+            v.label + if (v.ok && v.detail.isNotEmpty()) "  ·  " + v.detail else "",
             modifier = Modifier.fillMaxWidth(),
             style = qStylePx(13f, 300, ConvLabelInk, lh = 1.3f, align = TextAlign.End),
             maxLines = 1,
@@ -274,7 +278,7 @@ private fun ResultRow(v: com.qalculator.app.logic.MemoView, modifier: Modifier) 
         BasicText(
             total,
             modifier = Modifier.fillMaxWidth(),
-            style = qStylePx(totalSize, 300, Q.KeyGreen, lh = 1.15f, tnum = true, align = TextAlign.End),
+            style = qStylePx(totalSize, 300, Q.KeyGreen, lh = 1.1f, tnum = true, align = TextAlign.End),
             maxLines = 1,
             softWrap = false,
             overflow = TextOverflow.Clip

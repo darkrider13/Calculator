@@ -18,6 +18,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -167,10 +169,16 @@ fun NumeralPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
         ) {
-            // row 1: AC (green), backspace (red), F, E
+            // row 1: AC (green), backspace (red; hold = clear all), F, E
+            val haptic = LocalHapticFeedback.current
             Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 PressBox(onClick = { st.press("AC") }, pressedScale = 0.88f, modifier = Modifier.weight(1f).fillMaxHeight()) { AcText() }
-                PressBox(onClick = { st.press("⌫") }, pressedScale = 0.88f, modifier = Modifier.weight(1f).fillMaxHeight()) { BackIcon() }
+                PressBox(
+                    onClick = { st.press("⌫") },
+                    onLongClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); st.press("AC") },
+                    pressedScale = 0.88f,
+                    modifier = Modifier.weight(1f).fillMaxHeight()
+                ) { BackIcon() }
                 NumKey("F", st, Modifier.weight(1f).fillMaxHeight())
                 NumKey("E", st, Modifier.weight(1f).fillMaxHeight())
             }
