@@ -29,6 +29,8 @@ import com.qalculator.app.ui.CalcController
 import com.qalculator.app.ui.CalcScreen
 import com.qalculator.app.ui.ConvertScreen
 import com.qalculator.app.ui.ConverterPage
+import com.qalculator.app.ui.NumeralPage
+import com.qalculator.app.ui.BmiPage
 import com.qalculator.app.logic.ConvCategory
 import com.qalculator.app.ui.PricePage
 import com.qalculator.app.ui.LocalCompact
@@ -51,6 +53,7 @@ fun QalculatorApp(state: AppState) {
     var showConvert by remember { mutableStateOf(false) }
     var showPrice by remember { mutableStateOf(false) }
     var converter by remember { mutableStateOf<ConvCategory?>(null) }
+    var extra by remember { mutableStateOf<String?>(null) }
     // CSS px never follow the phone's font-size setting (the old WebView app ignored it too), so sp == dp here:
     // this keeps every fixed-height row from overlapping when the system font size is large
     val dens = LocalDensity.current
@@ -94,7 +97,8 @@ fun QalculatorApp(state: AppState) {
                                     onBack = { showConvert = false },
                                     onPrice = { showPrice = true },
                                     onConverter = { converter = it },
-                                    backEnabled = !showPrice && converter == null,
+                                    onExtra = { extra = it },
+                                    backEnabled = !showPrice && converter == null && extra == null,
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
                                         .fillMaxHeight()
@@ -106,6 +110,26 @@ fun QalculatorApp(state: AppState) {
                                 ConverterPage(
                                     cat = cat,
                                     onBack = { converter = null },
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .fillMaxHeight()
+                                        .widthIn(max = 460.dp)
+                                        .fillMaxWidth()
+                                )
+                            }
+                            if (extra == "Numeral system") {
+                                NumeralPage(
+                                    onBack = { extra = null },
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .fillMaxHeight()
+                                        .widthIn(max = 460.dp)
+                                        .fillMaxWidth()
+                                )
+                            }
+                            if (extra == "BMI") {
+                                BmiPage(
+                                    onBack = { extra = null },
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
                                         .fillMaxHeight()
