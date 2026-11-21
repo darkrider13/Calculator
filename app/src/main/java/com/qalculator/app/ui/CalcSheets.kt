@@ -190,13 +190,13 @@ private fun UpdateButton(overlays: Overlays) {
                     busy = false
                     val cur = Updater.currentBuild(ctx)
                     if (failed) {
-                        overlays.askConfirm("Couldn't check for updates", "Check your internet connection and try again.", "OK") { }
+                        overlays.askConfirm("Couldn't check for updates", "Check your internet connection and try again.", "OK", infoOnly = true) { }
                     } else if (info != null && info.build > cur) {
                         overlays.askConfirm("Update available", "New version " + info.tag + " is available. Download it?", "Download") {
                             Updater.download(ctx, info)
                         }
                     } else {
-                        overlays.askConfirm("Update", "You are on the latest version.", "OK") { }
+                        overlays.askConfirm("Update", "You are on the latest version.", "OK", infoOnly = true) { }
                     }
                 }
             }
@@ -240,7 +240,7 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit) {
             )
         }
     } else base
-    Box(modifier = m.padding(horizontal = 10.dp, vertical = 8.dp), contentAlignment = Alignment.CenterStart) {
+    Box(modifier = m.padding(start = 10.dp, end = 4.dp, top = 8.dp, bottom = 8.dp), contentAlignment = Alignment.CenterStart) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
             BoxWithConstraints(Modifier.fillMaxWidth()) {
                 val maxR = maxWidth * 0.55f
@@ -289,11 +289,11 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit) {
                         onClick = onUse,
                         modifier = Modifier
                             .padding(end = 2.dp)
-                            .heightIn(min = 30.dp)
+                            .heightIn(min = 24.dp)
                             .background(Q.KeyEq, androidx.compose.foundation.shape.RoundedCornerShape(percent = 50)),
-                        contentPadding = PaddingValues(horizontal = 18.dp)
+                        contentPadding = PaddingValues(horizontal = 12.dp)
                     ) {
-                        BasicText("Use", style = qStyle(0.85f, 700, Color.White))
+                        BasicText("Use", style = qStyle(0.74f, 700, Color.White))
                     }
                 }
             }
@@ -451,7 +451,7 @@ private fun VSum(ctl: CalcController, view: VView) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .panel(Q.Surface, 20.dp, border = null)
+            .panel(Q.Black, 20.dp)
             .padding(horizontal = 15.dp, vertical = 11.dp)
     ) {
         Box(
@@ -523,11 +523,11 @@ private fun VArrow(label: String, onClick: () -> Unit, modifier: Modifier) {
         onClick = onClick,
         pressedScale = 0.96f,
         modifier = modifier
-            .width(56.dp)
-            .panel(Q.KeyOp, 22.dp, border = null),
-        contentPadding = PaddingValues(bottom = 4.dp)
+            .width(44.dp)
+            .panel(Q.Black, 16.dp),
+        contentPadding = PaddingValues(bottom = 3.dp)
     ) {
-        BasicText(label, style = qStylePx(32f, 600, Q.Accent, lh = 1f, align = TextAlign.Center))
+        BasicText(label, style = qStylePx(28f, 600, Q.Accent, lh = 1f, align = TextAlign.Center))
     }
 }
 
@@ -542,7 +542,6 @@ private fun VCurrent(ctl: CalcController, view: VView, modifier: Modifier) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .panel(Q.Surface, 22.dp, border = null)
             .onSizeChanged { boxW = it.width }
             .pointerInput(Unit) {
                 val slop = 10.dp.toPx()
@@ -573,21 +572,17 @@ private fun VCurrent(ctl: CalcController, view: VView, modifier: Modifier) {
                     }
                 }
             }
-            .padding(9.dp)
+            .padding(horizontal = 4.dp, vertical = 6.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            BasicText(
-                text = view.pos,
-                style = qStyle(0.85f, 600, Q.Muted, tnum = true, align = TextAlign.Center)
-            )
             if (!editing) {
                 // fitNum(): shrink a long number so it stays on one line
                 val avail = boxW - 22f * density.density
-                var fs = 24f
+                var fs = 40f
                 var style = qStylePx(fs, 700, Q.Ink, lh = 1.15f, tnum = true, align = TextAlign.Center)
                 var w = measurer.measure(view.num, style, softWrap = false).size.width
                 if (w > 0 && avail > 0f) {
@@ -662,12 +657,30 @@ private fun VButton(text: String, bg: Color, fg: Color, onClick: () -> Unit, mod
     }
 }
 
+/** small black tile: label on top, value below ("Sum so far" / "Total") */
+@Composable
+private fun VTile(label: String, value: String, modifier: Modifier) {
+    Column(
+        modifier = modifier
+            .panel(Q.Black, 18.dp)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        BasicText(label, style = qStyle(0.78f, 400, Q.Muted), maxLines = 1, softWrap = false)
+        BasicText(value, style = qStyle(1.3f, 600, Q.Ink, tnum = true), maxLines = 1, softWrap = false)
+    }
+}
+
 @Composable
 fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
     val view = ctl.vView ?: return
     val overlays = LocalOverlays.current
     val editing = ctl.vEditing
     val state = rememberScrollState()
+    val pos = view.pos.split(" / ")
+    val posText = if (pos.size == 2) "Number " + pos[0] + " of " + pos[1] else view.pos
+    val tiles = view.tot.filter { !it.ok && it.value != null }
+    val allOk = view.tot.any { it.ok }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -677,32 +690,24 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
     ) {
         SheetHead("Verify", onBack = { ctl.vBack() })
         VSum(ctl, view)
-        Row(
+        // one compact card: position + Remove, arrows around the number, hint / save row
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .panel(Q.Black, 22.dp)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            VArrow("‹", { ctl.vStepBy(-1) }, Modifier.fillMaxHeight().heightIn(min = 72.dp))
-            VCurrent(ctl, view, Modifier.weight(1f).fillMaxHeight())
-            VArrow("›", { ctl.vStepBy(1) }, Modifier.fillMaxHeight().heightIn(min = 72.dp))
-        }
-        BasicText(
-            text = "If a number is wrong, tap the big box in the middle to fix it",
-            style = qStyle(0.72f, 500, Q.Muted, align = TextAlign.Center),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp)
-        )
-        if (!editing) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (!view.delHidden) {
+                BasicText(
+                    posText,
+                    style = qStyle(0.85f, 600, Q.Muted, tnum = true),
+                    modifier = Modifier.weight(1f)
+                )
+                if (!editing && !view.delHidden) {
                     PressBox(
                         onClick = {
                             overlays.askConfirm(
@@ -711,38 +716,67 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                                 "Remove"
                             ) { ctl.vDeleteNumber() }
                         },
-                        modifier = Modifier.heightIn(min = 32.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp)
+                        modifier = Modifier.heightIn(min = 28.dp),
+                        contentPadding = PaddingValues(horizontal = 4.dp)
                     ) {
-                        BasicText("Remove", style = qStyle(0.85f, 600, Q.Bad))
+                        BasicText("Remove", style = qStyle(0.85f, 700, Q.Bad))
                     }
                 }
             }
-        } else {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                VEditSave(ctl, Modifier.weight(1f))
-                VButton("Cancel", Q.Field2, Q.Ink, { ctl.vCancelEdit() }, Modifier.weight(1f))
+                VArrow("‹", { ctl.vStepBy(-1) }, Modifier.fillMaxHeight().heightIn(min = 60.dp))
+                VCurrent(ctl, view, Modifier.weight(1f).fillMaxHeight())
+                VArrow("›", { ctl.vStepBy(1) }, Modifier.fillMaxHeight().heightIn(min = 60.dp))
+            }
+            if (!editing) {
+                BasicText(
+                    text = "Tap the number to fix it",
+                    style = qStyle(0.78f, 500, Q.Muted, align = TextAlign.Center),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    VEditSave(ctl, Modifier.weight(1f))
+                    VButton("Cancel", Q.Field2, Q.Ink, { ctl.vCancelEdit() }, Modifier.weight(1f))
+                }
             }
         }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+        // Sum so far / Total tiles
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            for (t in view.tot) {
-                if (t.ok) {
-                    BasicText(t.label, style = qStyle(0.86f, 700, Q.Good, tnum = true))
-                } else {
-                    val text = buildAnnotatedString {
-                        append(t.label)
-                        withStyle(SpanStyle(color = Q.Ink, fontWeight = FontWeight.Bold)) { append(t.value ?: "") }
-                    }
-                    BasicText(text, style = qStyle(0.86f, 400, Q.Muted, tnum = true))
+            for (t in tiles) {
+                VTile(t.label.trim().trimEnd(':'), t.value ?: "", Modifier.weight(1f))
+            }
+        }
+        // status line on the left, Use pill on the right
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(Modifier.weight(1f)) {
+                if (allOk) {
+                    BasicText("✓ Everything matches", style = qStyle(0.9f, 700, Q.Good))
                 }
+            }
+            PressBox(
+                onClick = { ctl.verify?.let { ctl.useEntry(it.id) } },
+                modifier = Modifier
+                    .heightIn(min = 24.dp)
+                    .background(Q.KeyEq, androidx.compose.foundation.shape.RoundedCornerShape(percent = 50)),
+                contentPadding = PaddingValues(horizontal = 12.dp)
+            ) {
+                BasicText("Use", style = qStyle(0.74f, 700, Color.White))
             }
         }
     }

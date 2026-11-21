@@ -25,7 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.ScrollState
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -132,11 +138,13 @@ fun AgePage(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 digits = asOf, active = !dobActive, onSelect = { dobActive = false },
                 modifier = Modifier.heightIn(min = 72.dp).weight(0.5f)
             )
+            val resScroll = rememberScrollState()
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .scrollFade(resScroll)
+                    .verticalScroll(resScroll)
                     .padding(horizontal = 26.dp, vertical = 8.dp)
             ) {
                 AgeResultView(dob.length == 8 && dobDate == null, asOf.length == 8 && onDate == null, dobDate != null, onDate != null, result)
@@ -260,3 +268,28 @@ private fun StatLine(label: String, value: String) {
         )
     }
 }
+
+
+/** fades the top / bottom edge of a scrolling area while there is more content in that direction */
+private fun Modifier.scrollFade(state: ScrollState, fade: androidx.compose.ui.unit.Dp = 28.dp): Modifier =
+    this
+        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            val h = fade.toPx().coerceAtMost(size.height / 2f)
+            if (state.canScrollBackward) {
+                drawRect(
+                    brush = Brush.verticalGradient(listOf(Color.Transparent, Color.Black), startY = 0f, endY = h),
+                    size = androidx.compose.ui.geometry.Size(size.width, h),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+            if (state.canScrollForward) {
+                drawRect(
+                    brush = Brush.verticalGradient(listOf(Color.Black, Color.Transparent), startY = size.height - h, endY = size.height),
+                    topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - h),
+                    size = androidx.compose.ui.geometry.Size(size.width, h),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+        }

@@ -76,7 +76,9 @@ class ConfirmRequest(
     val title: String,
     val message: String,
     val yesLabel: String,
-    val onYes: () -> Unit
+    val onYes: () -> Unit,
+    /** info only: no "No" button, just one green button in the middle */
+    val infoOnly: Boolean = false
 )
 
 /** The unit menu: where the button is on screen, the choices, the chosen one, what to do on pick */
@@ -97,9 +99,9 @@ class Overlays {
 
     val anyOpen: Boolean get() = confirm != null || menu != null
 
-    fun askConfirm(title: String, message: String, yesLabel: String, onYes: () -> Unit) {
+    fun askConfirm(title: String, message: String, yesLabel: String, infoOnly: Boolean = false, onYes: () -> Unit) {
         menu = null
-        confirm = ConfirmRequest(title, message, yesLabel, onYes)
+        confirm = ConfirmRequest(title, message, yesLabel, onYes, infoOnly)
     }
 
     fun closeConfirm() {
@@ -260,10 +262,10 @@ private fun ConfirmDialog(req: ConfirmRequest, onClose: () -> Unit) {
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = if (req.infoOnly) Arrangement.Center else Arrangement.SpaceBetween
             ) {
-                CfmButton(text = "No", yes = false, onClick = onClose)
-                CfmButton(text = req.yesLabel, yes = true, onClick = {
+                if (!req.infoOnly) CfmButton(text = "No", yes = false, onClick = onClose)
+                CfmButton(text = req.yesLabel, yes = true, green = req.infoOnly, onClick = {
                     onClose()
                     req.onYes()
                 })
@@ -273,7 +275,7 @@ private fun ConfirmDialog(req: ConfirmRequest, onClose: () -> Unit) {
 }
 
 @Composable
-private fun CfmButton(text: String, yes: Boolean, onClick: () -> Unit) {
+private fun CfmButton(text: String, yes: Boolean, green: Boolean = false, onClick: () -> Unit) {
     PressBox(
         onClick = onClick,
         modifier = Modifier
@@ -281,7 +283,7 @@ private fun CfmButton(text: String, yes: Boolean, onClick: () -> Unit) {
             .drawBehind {
                 val r = 10.dp.toPx()
                 if (yes) {
-                    drawRoundRect(color = Color(0xFFFF0000), cornerRadius = CornerRadius(r))
+                    drawRoundRect(color = if (green) Q.KeyEq else Color(0xFFFF0000), cornerRadius = CornerRadius(r))
                 } else {
                     drawRoundRect(color = Color.White, cornerRadius = CornerRadius(r))
                 }

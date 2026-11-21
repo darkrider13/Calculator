@@ -76,7 +76,7 @@ fun BmiPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
         val w = weight.toDoubleOrNull()
         if (h == null || w == null || h <= 0.0 || w <= 0.0) {
             bmiText = null
-            overlays.askConfirm("BMI", "Enter your height (cm) and weight (kg).", "OK") { }
+            overlays.askConfirm("BMI", "Enter your height (cm) and weight (kg).", "OK", infoOnly = true) { }
             return
         }
         val m = h / 100.0
