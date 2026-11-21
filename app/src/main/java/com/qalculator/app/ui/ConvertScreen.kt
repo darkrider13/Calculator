@@ -114,6 +114,7 @@ fun ConvertScreen(
     onBack: () -> Unit,
     onPrice: () -> Unit,
     onConverter: (ConvCategory) -> Unit,
+    onExtra: (String) -> Unit = {},
     backEnabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
@@ -132,6 +133,7 @@ fun ConvertScreen(
                     Box(modifier = Modifier.weight(1f)) {
                         ConvertCell(opt) {
                             if (opt.label == "Price") onPrice()
+                            else if (opt.label == "Numeral system" || opt.label == "BMI") onExtra(opt.label)
                             else Converters.byLabel(opt.label)?.let(onConverter)
                         }
                     }

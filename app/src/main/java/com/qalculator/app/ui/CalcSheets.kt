@@ -168,12 +168,7 @@ fun CalcHistorySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                     CalcItem(
                         e = e,
                         onOpen = { ctl.openVerifyFor(e.id) },
-                        onUse = { ctl.useEntry(e.id) },
-                        onDelete = {
-                            overlays.askConfirm("Delete calculation?", "This calculation will be deleted.", "Delete") {
-                                ctl.deleteEntry(e.id)
-                            }
-                        }
+                        onUse = { ctl.useEntry(e.id) }
                     )
                 }
             }
@@ -216,7 +211,7 @@ private fun UpdateButton(overlays: Overlays) {
 
 /** .c-item: one saved calculation. Tapping it opens মিলান (when it has two or more numbers). */
 @Composable
-private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit, onDelete: () -> Unit) {
+private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit) {
     val verifiable = remember(e.expr) { canVerify(e.expr) }
     var pressed by remember { mutableStateOf(false) }
     val onOpenNow by rememberUpdatedState(onOpen)
@@ -294,9 +289,6 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit, onDele
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         BasicText("Use", style = qStyle(0.85f, 600, Q.KeyGreen))
-                    }
-                    PressBox(onClick = onDelete, modifier = Modifier.size(width = 26.dp, height = 20.dp)) {
-                        SvgIcon(Icons.Trash, TrashRed, Modifier.size(13.dp))
                     }
                 }
             }

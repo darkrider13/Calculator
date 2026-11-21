@@ -42,18 +42,18 @@ import com.qalculator.app.logic.plainNumber
 
 /*
  * One converter page (Temperature, Length, Area, Volume, Speed, Time, Mass): back arrow, big title,
- * two unit rows (the one you type in is orange, the other one shows the converted number) and the keypad
+ * two unit rows (the one you type in is white, the other one shows the converted number in green) and the keypad
  * with the tall AC and backspace buttons. The numbers come from logic/Converter.kt.
  */
 
 private val ConvOrange = Color(0xFFD2693C)
-private val ConvTitleInk = Color(0xFFD4D4D8)
-private val ConvLabelInk = Color(0xFF8E8E93)
+internal val ConvTitleInk = Color(0xFFD4D4D8)
+internal val ConvLabelInk = Color(0xFF8E8E93)
 private val ConvPill = Color(0xFF333333)
-private val ConvDivider = Color(0xFF2A2A2C)
+internal val ConvDivider = Color(0xFF2A2A2C)
 
 /** the small up / down arrows next to the unit */
-private val UpDownIcon = IconDef(listOf("M8 9.5l4-4 4 4", "M8 14.5l4 4 4-4"), 2f)
+internal val UpDownIcon = IconDef(listOf("M8 9.5l4-4 4 4", "M8 14.5l4 4 4-4"), 2f)
 
 /** plus over minus with a slash (the +/− key of the temperature keypad) */
 private val PlusMinusIcon = IconDef(listOf("M8 4.5v7", "M4.5 8h7", "M13 18.5h7", "M5.5 20L18.5 4"), 1.8f)
@@ -169,7 +169,7 @@ fun ConverterPage(cat: ConvCategory, onBack: () -> Unit, modifier: Modifier = Mo
 
 /** one unit row: the unit button on the left, the number on the right with the unit name under it */
 @Composable
-private fun ConvRow(
+internal fun ConvRow(
     unit: com.qalculator.app.logic.ConvUnit,
     text: String,
     active: Boolean,
@@ -203,7 +203,7 @@ private fun ConvRow(
                 BasicText(
                     text,
                     modifier = Modifier.fillMaxWidth(),
-                    style = qStylePx(fontSp, 300, if (active) ConvOrange else Color.White, lh = 1.15f, align = TextAlign.End),
+                    style = qStylePx(fontSp, 300, if (active) Color.White else Q.KeyGreen, lh = 1.15f, align = TextAlign.End),
                     maxLines = 1,
                     softWrap = false,
                     overflow = TextOverflow.Clip
@@ -222,7 +222,7 @@ private fun ConvRow(
 
 /** the unit symbol with the up / down arrows; tapping it opens the unit menu */
 @Composable
-private fun UnitChip(label: String, onClick: (Rect) -> Unit) {
+internal fun UnitChip(label: String, onClick: (Rect) -> Unit) {
     val bounds = remember { arrayOf(Rect.Zero) }
     PressBox(
         onClick = { onClick(bounds[0]) },
@@ -327,7 +327,7 @@ private fun Pill(onClick: () -> Unit, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun AcText() {
+internal fun AcText() {
     BasicText(
         "AC",
         style = qStylePx(24f, 500, Q.KeyGreen, lh = 1.2f, align = TextAlign.Center),
@@ -338,6 +338,6 @@ private fun AcText() {
 
 /** the cross (backspace) icon of the main calculator, in red */
 @Composable
-private fun BackIcon() {
+internal fun BackIcon() {
     SvgIcon(Icons.Backspace, Q.KeyRed, Modifier.size(28.dp))
 }
