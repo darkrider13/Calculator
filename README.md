@@ -53,12 +53,13 @@ Everyday math, scientific functions, unit and price conversion, age and BMI tool
 
 ## 🔐 Permissions
 
+The app works **100% offline** and does not ask for internet access.
+
 | Permission | Why it is needed |
 |---|---|
 | Display over other apps | Shows the floating calculator window |
 | Foreground service & notifications | Keeps the floating calculator running |
 | Vibration | Key press feedback |
-| Internet | Optional features that need a network connection |
 
 ## 🛠️ Build from source
 
