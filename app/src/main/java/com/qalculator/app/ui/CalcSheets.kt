@@ -68,6 +68,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.graphicsLayer
+import com.qalculator.app.Updater
 import com.qalculator.app.logic.CalcEntry
 import com.qalculator.app.logic.VPiece
 import com.qalculator.app.logic.VView
@@ -126,6 +127,7 @@ fun CalcHistorySheet(ctl: CalcController, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         SheetHead("ক্যালকুলেটর হিস্টরি", onBack = { ctl.closeSheet() }) {
+            UpdateButton(overlays)
             if (entries.isNotEmpty()) {
                 PressBox(
                     onClick = {
@@ -176,6 +178,39 @@ fun CalcHistorySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                 }
             }
         }
+    }
+}
+
+/** the update icon: looks at the latest GitHub release and offers to download it if it is newer than this app */
+@Composable
+private fun UpdateButton(overlays: Overlays) {
+    val ctx = LocalContext.current
+    var busy by remember { mutableStateOf(false) }
+    PressBox(
+        onClick = {
+            if (!busy) {
+                busy = true
+                Updater.check { info, failed ->
+                    busy = false
+                    val cur = Updater.currentBuild(ctx)
+                    if (failed) {
+                        overlays.askConfirm("আপডেট চেক করা যায়নি", "ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।", "ঠিক আছে") { }
+                    } else if (info != null && info.build > cur) {
+                        overlays.askConfirm("নতুন আপডেট আছে", "নতুন ভার্সন " + info.tag + " পাওয়া গেছে। ডাউনলোড করবেন?", "ডাউনলোড") {
+                            Updater.download(ctx, info)
+                        }
+                    } else {
+                        overlays.askConfirm("আপডেট", "আপনি সর্বশেষ ভার্সনেই আছেন।", "ঠিক আছে") { }
+                    }
+                }
+            }
+        },
+        pressedScale = 0.92f,
+        modifier = Modifier
+            .size(width = 36.dp, height = 32.dp)
+            .graphicsLayer { alpha = if (busy) 0.4f else 1f }
+    ) {
+        SvgIcon(Icons.Sync, Q.IconGray, Modifier.size(22.dp))
     }
 }
 

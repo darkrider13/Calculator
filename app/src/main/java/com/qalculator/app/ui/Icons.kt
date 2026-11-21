@@ -28,6 +28,12 @@ object Icons {
     /** reset button */
     val Reset = IconDef(listOf("M20 11a8 8 0 1 0-2.3 5.7", "M20 4v7h-7"), 2f)
 
+    /** update / sync: two arrows going round */
+    val Sync = IconDef(
+        listOf("M4.5 12a7.5 7.5 0 0 1 12.8-5.3", "M17.5 3.5v3.5h-3.5", "M19.5 12a7.5 7.5 0 0 1-12.8 5.3", "M6.5 20.5V17H10"),
+        1.8f
+    )
+
     /** delete (trash) */
     val Trash = IconDef(
         listOf("M3 6h18", "M8 6V4h8v2", "M19 6l-1 14H6L5 6", "M10 11v6", "M14 11v6"),
