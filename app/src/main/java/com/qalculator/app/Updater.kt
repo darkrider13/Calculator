@@ -17,7 +17,7 @@ import java.net.URL
 
 /** Checks the latest GitHub release of the app and downloads its APK. */
 object Updater {
-    const val REPO = "darkrider13/Qalculator-v2"
+    const val REPO = "darkrider13/Calculator"
 
     /** the build number of the installed app (GitHub run number) */
     fun currentBuild(ctx: Context): Int {
