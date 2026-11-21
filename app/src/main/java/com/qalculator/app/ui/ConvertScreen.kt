@@ -96,6 +96,16 @@ private val ConvertOptions = listOf(
             1.7f
         )
     ),
+    ConvertOption(
+        "Age",
+        IconDef(
+            listOf(
+                "M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z",
+                "M3 10h18", "M8 3v4", "M16 3v4"
+            ),
+            1.7f
+        )
+    ),
     // price tag logo: opens the price (dam hishab) page
     ConvertOption(
         "Price",
@@ -133,7 +143,7 @@ fun ConvertScreen(
                     Box(modifier = Modifier.weight(1f)) {
                         ConvertCell(opt) {
                             if (opt.label == "Price") onPrice()
-                            else if (opt.label == "Numeral system" || opt.label == "BMI") onExtra(opt.label)
+                            else if (opt.label == "Numeral system" || opt.label == "BMI" || opt.label == "Age") onExtra(opt.label)
                             else Converters.byLabel(opt.label)?.let(onConverter)
                         }
                     }

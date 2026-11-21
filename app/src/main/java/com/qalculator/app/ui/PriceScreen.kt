@@ -525,7 +525,7 @@ private val TrashRedP = Color(0xFFFF0000)
 
 /** .histbox: the saved prices, a few at a time (pages), never scrolling */
 @Composable
-private fun HistBox(ctl: PriceController, overlays: Overlays) {
+internal fun HistBox(ctl: PriceController, overlays: Overlays, onReused: () -> Unit = {}) {
     val items = ctl.history
     Column(
         modifier = Modifier
@@ -602,7 +602,10 @@ private fun HistBox(ctl: PriceController, overlays: Overlays) {
                             val e = items[i]
                             HistItem(
                                 e = e,
-                                onReuse = { ctl.reuse(e.id) },
+                                onReuse = {
+                                    ctl.reuse(e.id)
+                                    onReused()
+                                },
                                 onDelete = {
                                     overlays.askConfirm("Delete history item?", "This entry will be deleted.", "Delete") {
                                         ctl.deleteHistory(e.id)

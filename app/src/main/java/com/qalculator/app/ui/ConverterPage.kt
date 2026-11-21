@@ -321,7 +321,7 @@ internal fun UnitChip(label: String, onClick: (Rect) -> Unit) {
  * the tall AC and backspace buttons. The temperature keypad has no tall buttons: AC, backspace and +/− in a column.
  */
 @Composable
-private fun ConvKeypad(signed: Boolean, onKey: (String) -> Unit, modifier: Modifier) {
+internal fun ConvKeypad(signed: Boolean, onKey: (String) -> Unit, modifier: Modifier, dot: Boolean = true) {
     Row(modifier = modifier) {
         Column(modifier = Modifier.weight(3f).fillMaxHeight()) {
             for (row in listOf(listOf("7", "8", "9"), listOf("4", "5", "6"), listOf("1", "2", "3"))) {
@@ -332,7 +332,7 @@ private fun ConvKeypad(signed: Boolean, onKey: (String) -> Unit, modifier: Modif
             Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 Spacer(Modifier.weight(1f))
                 DigitKey("0", Modifier.weight(1f).fillMaxHeight(), onKey)
-                DigitKey(".", Modifier.weight(1f).fillMaxHeight(), onKey)
+                if (dot) DigitKey(".", Modifier.weight(1f).fillMaxHeight(), onKey) else Spacer(Modifier.weight(1f))
             }
         }
         Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
