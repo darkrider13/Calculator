@@ -28,9 +28,11 @@ fun memoOf(f: Form): MemoView {
     var small: String? = null
     val detail: String
     if (ok && q) {
-        val bp = baseParts(c.grams, dimOf(f.ru))
-        main = bp.first
-        small = bp.second
+        // "quantity for money": what you get is shown in the unit chosen for the shop quantity
+        val ru = unitOf(f.ru)
+        val v = c.grams / ru.f
+        main = if (ru.f == 1.0) numf(r1(v), 1) else numf(v, 3)
+        small = ru.n
         detail = (if (item != "") "$item · " else "") + money(c.amt) + TAKA_SUF
     } else if (ok) {
         main = money(c.total)
@@ -42,7 +44,7 @@ fun memoOf(f: Form): MemoView {
     } else {
         if (q) {
             main = "0.0"
-            small = baseOf(dimOf(f.ru)).n
+            small = unitOf(f.ru).n
         } else {
             main = "0.00"
             cur = true
