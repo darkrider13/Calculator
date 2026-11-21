@@ -32,6 +32,8 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -323,7 +325,9 @@ private fun UnitMenu(req: MenuRequest, onClose: () -> Unit) {
                 .glass(16f)
                 .clickable(interactionSource = menuSource, indication = null, onClick = {})
                 .width(IntrinsicSize.Max)
-                .padding(6.dp),
+                .padding(6.dp)
+                // long lists (the converter units) scroll when they do not fit the screen
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             for (opt in req.options) {

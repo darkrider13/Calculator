@@ -20,10 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.qalculator.app.logic.ConvCategory
+import com.qalculator.app.logic.Converters
 
 /*
  * The convert page: only the list of options (3 per row), same style as the reference picture.
- * Opened by the ruler button under the display. Only "Price" opens a page (the price / dam hishab tab).
+ * Opened by the ruler button under the display. "Price" opens the price / dam hishab tab, and
+ * Temperature / Length / Area / Volume / Speed / Time / Mass open their converter page.
  */
 
 private val ConvInk = Color(0xFFD4D4D8)
@@ -31,10 +34,6 @@ private val ConvInk = Color(0xFFD4D4D8)
 private class ConvertOption(val label: String, val icon: IconDef)
 
 private val ConvertOptions = listOf(
-    ConvertOption(
-        "Currency",
-        IconDef(listOf("M7 4l5 6 5-6", "M12 10v10", "M7 13.5h10", "M7 17h10"), 1.7f)
-    ),
     ConvertOption("Length", Icons.Ruler),
     ConvertOption(
         "Area",
@@ -114,6 +113,7 @@ private val ConvertOptions = listOf(
 fun ConvertScreen(
     onBack: () -> Unit,
     onPrice: () -> Unit,
+    onConverter: (ConvCategory) -> Unit,
     backEnabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
@@ -130,7 +130,10 @@ fun ConvertScreen(
             Row(modifier = Modifier.fillMaxWidth()) {
                 for (opt in rowItems) {
                     Box(modifier = Modifier.weight(1f)) {
-                        ConvertCell(opt) { if (opt.label == "Price") onPrice() }
+                        ConvertCell(opt) {
+                            if (opt.label == "Price") onPrice()
+                            else Converters.byLabel(opt.label)?.let(onConverter)
+                        }
                     }
                 }
                 for (i in 0 until 3 - rowItems.size) {
