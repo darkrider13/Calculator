@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🧮 Calculator
+<img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" alt="Calculator app icon" width="120" height="120">
+
+# Calculator
 
 **A fast, dark, and beautifully minimal calculator for Android.**
 Everyday math, scientific functions, unit and price conversion, age and BMI tools — all in one pocket-sized app.
