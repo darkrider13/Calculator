@@ -72,6 +72,7 @@ import com.qalculator.app.logic.HistEntry
 import com.qalculator.app.logic.MemoView
 import com.qalculator.app.logic.SaveResult
 import com.qalculator.app.logic.UNIT_OPTS
+import com.qalculator.app.logic.TAKA_SUF
 import com.qalculator.app.logic.baseParts
 import com.qalculator.app.logic.bnDigits
 import com.qalculator.app.logic.dimOf
@@ -168,7 +169,7 @@ class PriceController(private val app: AppState) {
     }
 }
 
-private const val SAVE_LABEL = "হিস্টরিতে সেভ করুন"
+private const val SAVE_LABEL = "Save to history"
 
 @Composable
 fun PriceScreen(ctl: PriceController, modifier: Modifier = Modifier) {
@@ -198,7 +199,7 @@ fun PriceScreen(ctl: PriceController, modifier: Modifier = Modifier) {
                 PriceInput(
                     value = f.item,
                     onChange = { ctl.setField("item", it) },
-                    placeholder = "পণ্যের নাম (ঐচ্ছিক)",
+                    placeholder = "Item name (optional)",
                     numeric = false,
                     money = false,
                     ime = ImeAction.Done,
@@ -211,27 +212,27 @@ fun PriceScreen(ctl: PriceController, modifier: Modifier = Modifier) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    LabeledField("দোকানের দাম", Modifier.weight(1f)) {
+                    LabeledField("Shop price", Modifier.weight(1f)) {
                         PriceInput(
-                            value = f.rp, onChange = { ctl.setField("rp", it) }, placeholder = "০.০০ ৳",
+                            value = f.rp, onChange = { ctl.setField("rp", it) }, placeholder = "0.00 Tk",
                             numeric = true, money = true, ime = ImeAction.Next, onAction = { ctl.save() },
                             maxLen = Int.MAX_VALUE, modifier = Modifier.fillMaxWidth()
                         )
                     }
-                    LabeledField("পরিমাণ", Modifier.weight(1f)) {
+                    LabeledField("Quantity", Modifier.weight(1f)) {
                         PriceInput(
-                            value = f.rw, onChange = { ctl.setField("rw", it) }, placeholder = "০.০০",
+                            value = f.rw, onChange = { ctl.setField("rw", it) }, placeholder = "0.00",
                             numeric = true, money = false, ime = ImeAction.Next, onAction = { ctl.save() },
                             maxLen = Int.MAX_VALUE, modifier = Modifier.fillMaxWidth()
                         )
                     }
-                    LabeledField("একক", Modifier.weight(1f)) {
+                    LabeledField("Unit", Modifier.weight(1f)) {
                         UnitPick(ctl, "ru", f.ru)
                     }
                 }
                 // 2: the switch
                 SegSwitch(
-                    items = listOf(SegItem("w", "পরিমাণ দিয়ে টাকা"), SegItem("p", "টাকা দিয়ে পরিমাণ")),
+                    items = listOf(SegItem("w", "Price for quantity"), SegItem("p", "Quantity for money")),
                     selected = f.m,
                     onSelect = { ctl.setMode(it) }
                 )
@@ -241,21 +242,21 @@ fun PriceScreen(ctl: PriceController, modifier: Modifier = Modifier) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        LabeledField("আপনি কিনছেন (পরিমাণ)", Modifier.weight(1.3f)) {
+                        LabeledField("You are buying (quantity)", Modifier.weight(1.3f)) {
                             PriceInput(
-                                value = f.w, onChange = { ctl.setField("w", it) }, placeholder = "০.০০",
+                                value = f.w, onChange = { ctl.setField("w", it) }, placeholder = "0.00",
                                 numeric = true, money = false, ime = ImeAction.Done, onAction = { ctl.save() },
                                 maxLen = Int.MAX_VALUE, modifier = Modifier.fillMaxWidth()
                             )
                         }
-                        LabeledField("একক", Modifier.weight(1f)) {
+                        LabeledField("Unit", Modifier.weight(1f)) {
                             UnitPick(ctl, "wu", f.wu)
                         }
                     }
                 } else {
-                    LabeledField("কত টাকার কিনবেন", Modifier.fillMaxWidth()) {
+                    LabeledField("How much money to spend", Modifier.fillMaxWidth()) {
                         PriceInput(
-                            value = f.amt, onChange = { ctl.setField("amt", it) }, placeholder = "০.০০ ৳",
+                            value = f.amt, onChange = { ctl.setField("amt", it) }, placeholder = "0.00 Tk",
                             numeric = true, money = true, ime = ImeAction.Done, onAction = { ctl.save() },
                             maxLen = Int.MAX_VALUE, modifier = Modifier.fillMaxWidth()
                         )
@@ -347,7 +348,7 @@ private object TakaSuffix : VisualTransformation {
         if (text.text.isEmpty()) return TransformedText(text, OffsetMapping.Identity)
         val len = text.text.length
         return TransformedText(
-            AnnotatedString(text.text + "৳"),
+            AnnotatedString(text.text + TAKA_SUF),
             object : OffsetMapping {
                 override fun originalToTransformed(offset: Int): Int = offset
                 override fun transformedToOriginal(offset: Int): Int = Math.min(offset, len)
@@ -371,7 +372,7 @@ private fun PriceInput(
 ) {
     val compact = LocalCompact.current
     // number boxes show Bengali digits (fillForm)
-    val shown = if (numeric) bnDigits(value) else value
+    val shown = value
     var tf by remember { mutableStateOf(TextFieldValue(shown, TextRange(shown.length))) }
     if (tf.text != shown) tf = TextFieldValue(shown, TextRange(shown.length))
     var focused by remember { mutableStateOf(false) }
@@ -387,7 +388,6 @@ private fun PriceInput(
             onValueChange = { nv ->
                 var t = nv.text
                 if (t.length > maxLen) t = t.take(maxLen)
-                if (numeric) t = bnDigits(t)
                 tf = nv.copy(text = t)
                 onChange(t)
             },
@@ -440,7 +440,7 @@ private fun MemoBox(v: MemoView, onReset: () -> Unit) {
     val total = buildAnnotatedString {
         append(v.main)
         if (v.cur) {
-            withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append("৳") }
+            withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append(TAKA_SUF) }
         }
         val s = v.small
         if (s != null) {
@@ -552,7 +552,7 @@ private fun HistBox(ctl: PriceController, overlays: Overlays) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                        BasicText("হিস্টরি", style = qStyle(0.78f, 700, Q.Ink))
+                        BasicText("History", style = qStyle(0.78f, 700, Q.Ink))
                     }
                     val showPager = n > 0 && pages > 1
                     Row(
@@ -573,9 +573,9 @@ private fun HistBox(ctl: PriceController, overlays: Overlays) {
                         PressBox(
                             onClick = {
                                 overlays.askConfirm(
-                                    "সব হিস্টরি মুছবেন?",
-                                    "সেভ করা সব হিসাব মুছে যাবে। এটা আর ফেরত আনা যাবে না।",
-                                    "হ্যাঁ, মুছুন"
+                                    "Delete all history?",
+                                    "All saved prices will be deleted. This cannot be undone.",
+                                    "Yes, delete"
                                 ) { ctl.clearHistory() }
                             },
                             enabled = n > 0,
@@ -590,7 +590,7 @@ private fun HistBox(ctl: PriceController, overlays: Overlays) {
                 // list
                 if (n == 0) {
                     BasicText(
-                        text = "এখনো কিছু সেভ হয়নি। নিচের সেভ বাটন চাপলে এখানে জমা হবে।",
+                        text = "Nothing saved yet. Tap the save button below and it will be kept here.",
                         style = qStyle(0.78f, 400, Q.Muted),
                         modifier = Modifier.padding(top = 8.dp)
                     )
@@ -604,7 +604,7 @@ private fun HistBox(ctl: PriceController, overlays: Overlays) {
                                 e = e,
                                 onReuse = { ctl.reuse(e.id) },
                                 onDelete = {
-                                    overlays.askConfirm("হিস্টরি মুছবেন?", "এই এন্ট্রিটি মুছে ফেলা হবে।", "মুছুন") {
+                                    overlays.askConfirm("Delete history item?", "This entry will be deleted.", "Delete") {
                                         ctl.deleteHistory(e.id)
                                     }
                                 }
@@ -639,7 +639,7 @@ private fun HistItem(e: HistEntry, onReuse: () -> Unit, onDelete: () -> Unit) {
     val total: AnnotatedString
     val base = 13.12f
     if (e.t == "q") {
-        title = itemPrefix + money(e.amt) + "৳"
+        title = itemPrefix + money(e.amt) + TAKA_SUF
         val hp = baseParts(e.grams, dimOf(e.ru))
         total = buildAnnotatedString {
             append(hp.first)
@@ -653,7 +653,7 @@ private fun HistItem(e: HistEntry, onReuse: () -> Unit, onDelete: () -> Unit) {
         total = buildAnnotatedString {
             append(money(e.total))
             withStyle(SpanStyle(fontSize = (base * 0.95f).sp, fontWeight = FontWeight.Bold, color = Q.Ink)) {
-                append(" ৳")
+                append(TAKA_SUF)
             }
         }
     }
@@ -726,7 +726,7 @@ private fun HistItem(e: HistEntry, onReuse: () -> Unit, onDelete: () -> Unit) {
                             modifier = Modifier.heightIn(min = 20.dp),
                             contentPadding = PaddingValues(horizontal = 5.dp)
                         ) {
-                            BasicText("আবার", style = qStyle(0.66f, 600, Q.Accent, lh = 1f))
+                            BasicText("Again", style = qStyle(0.66f, 600, Q.Accent, lh = 1f))
                         }
                         PressBox(
                             onClick = onDelete,

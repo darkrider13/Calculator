@@ -126,15 +126,15 @@ fun CalcHistorySheet(ctl: CalcController, modifier: Modifier = Modifier) {
             .blockTouches(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        SheetHead("ক্যালকুলেটর হিস্টরি", onBack = { ctl.closeSheet() }) {
+        SheetHead("Calculator History", onBack = { ctl.closeSheet() }) {
             UpdateButton(overlays)
             if (entries.isNotEmpty()) {
                 PressBox(
                     onClick = {
                         overlays.askConfirm(
-                            "সব হিসাব মুছবেন?",
-                            "ক্যালকুলেটরের সব হিস্টরি মুছে যাবে। এটা আর ফেরত আনা যাবে না।",
-                            "হ্যাঁ, মুছুন"
+                            "Delete all calculations?",
+                            "All calculator history will be deleted. This cannot be undone.",
+                            "Yes, delete"
                         ) { ctl.clearEntries() }
                     },
                     modifier = Modifier.size(width = 36.dp, height = 32.dp)
@@ -151,7 +151,7 @@ fun CalcHistorySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                     .padding(horizontal = 2.dp)
             ) {
                 BasicText(
-                    text = "এখনো কোনো হিসাব নেই। ক্যালকুলেটরে = চাপলে হিসাবটা এখানে জমা হবে।",
+                    text = "No calculations yet. Press = on the calculator and the result will be saved here.",
                     style = qStylePx(15f, 400, Q.Muted),
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -170,7 +170,7 @@ fun CalcHistorySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                         onOpen = { ctl.openVerifyFor(e.id) },
                         onUse = { ctl.useEntry(e.id) },
                         onDelete = {
-                            overlays.askConfirm("হিসাব মুছবেন?", "এই হিসাবটি মুছে ফেলা হবে।", "মুছুন") {
+                            overlays.askConfirm("Delete calculation?", "This calculation will be deleted.", "Delete") {
                                 ctl.deleteEntry(e.id)
                             }
                         }
@@ -194,13 +194,13 @@ private fun UpdateButton(overlays: Overlays) {
                     busy = false
                     val cur = Updater.currentBuild(ctx)
                     if (failed) {
-                        overlays.askConfirm("আপডেট চেক করা যায়নি", "ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।", "ঠিক আছে") { }
+                        overlays.askConfirm("Couldn't check for updates", "Check your internet connection and try again.", "OK") { }
                     } else if (info != null && info.build > cur) {
-                        overlays.askConfirm("নতুন আপডেট আছে", "নতুন ভার্সন " + info.tag + " পাওয়া গেছে। ডাউনলোড করবেন?", "ডাউনলোড") {
+                        overlays.askConfirm("Update available", "New version " + info.tag + " is available. Download it?", "Download") {
                             Updater.download(ctx, info)
                         }
                     } else {
-                        overlays.askConfirm("আপডেট", "আপনি সর্বশেষ ভার্সনেই আছেন।", "ঠিক আছে") { }
+                        overlays.askConfirm("Update", "You are on the latest version.", "OK") { }
                     }
                 }
             }
@@ -293,7 +293,7 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit, onDele
                         modifier = Modifier.heightIn(min = 32.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
-                        BasicText("ব্যবহার", style = qStyle(0.85f, 600, Q.KeyGreen))
+                        BasicText("Use", style = qStyle(0.85f, 600, Q.KeyGreen))
                     }
                     PressBox(onClick = onDelete, modifier = Modifier.size(width = 26.dp, height = 20.dp)) {
                         SvgIcon(Icons.Trash, TrashRed, Modifier.size(13.dp))
@@ -641,7 +641,7 @@ private fun VEditField(ctl: CalcController) {
             ) {
                 if (tf.text.isEmpty()) {
                     BasicText(
-                        "সঠিক সংখ্যা",
+                        "Correct number",
                         style = qStylePx(fontPx, 700, Color(0xFF757575), lh = 1.2f, align = TextAlign.Center),
                         maxLines = 1,
                         softWrap = false
@@ -678,7 +678,7 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
             .verticalScroll(state),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        SheetHead("মিলিয়ে দেখুন", onBack = { ctl.vBack() })
+        SheetHead("Verify", onBack = { ctl.vBack() })
         VSum(ctl, view)
         Row(
             modifier = Modifier
@@ -691,7 +691,7 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
             VArrow("›", { ctl.vStepBy(1) }, Modifier.fillMaxHeight().heightIn(min = 72.dp))
         }
         BasicText(
-            text = "কোনো সংখ্যা ভুল হলে মাঝের বড় বক্সে চাপ দিয়ে ঠিক করুন",
+            text = "If a number is wrong, tap the big box in the middle to fix it",
             style = qStyle(0.72f, 500, Q.Muted, align = TextAlign.Center),
             modifier = Modifier
                 .fillMaxWidth()
@@ -709,15 +709,15 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                     PressBox(
                         onClick = {
                             overlays.askConfirm(
-                                "সংখ্যাটা বাদ দিবেন?",
-                                "এই সংখ্যাটা হিসাব থেকে সরে যাবে আর ফলাফল নতুন করে হবে।",
-                                "বাদ দিন"
+                                "Remove this number?",
+                                "This number will be removed from the calculation and the result will be recalculated.",
+                                "Remove"
                             ) { ctl.vDeleteNumber() }
                         },
                         modifier = Modifier.heightIn(min = 32.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
-                        BasicText("বাদ দিন", style = qStyle(0.85f, 600, Q.Bad))
+                        BasicText("Remove", style = qStyle(0.85f, 600, Q.Bad))
                     }
                 }
             }
@@ -727,7 +727,7 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 VEditSave(ctl, Modifier.weight(1f))
-                VButton("বাতিল", Q.Field2, Q.Ink, { ctl.vCancelEdit() }, Modifier.weight(1f))
+                VButton("Cancel", Q.Field2, Q.Ink, { ctl.vCancelEdit() }, Modifier.weight(1f))
             }
         }
         Column(
@@ -754,5 +754,5 @@ fun VerifySheet(ctl: CalcController, modifier: Modifier = Modifier) {
 /** "সেভ" */
 @Composable
 private fun VEditSave(ctl: CalcController, modifier: Modifier) {
-    VButton("সেভ", Q.Primary, Q.AccentInk, { ctl.vSave(ctl.vEdit.text) }, modifier)
+    VButton("Save", Q.Primary, Q.AccentInk, { ctl.vSave(ctl.vEdit.text) }, modifier)
 }

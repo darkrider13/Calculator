@@ -226,7 +226,7 @@ private fun ConfirmDialog(req: ConfirmRequest, onClose: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                CfmButton(text = "না", yes = false, onClick = onClose)
+                CfmButton(text = "No", yes = false, onClick = onClose)
                 CfmButton(text = req.yesLabel, yes = true, onClick = {
                     onClose()
                     req.onYes()

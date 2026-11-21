@@ -330,14 +330,14 @@ private fun Pill(onClick: () -> Unit, content: @Composable () -> Unit) {
 private fun AcText() {
     BasicText(
         "AC",
-        style = qStylePx(24f, 500, ConvOrange, lh = 1.2f, align = TextAlign.Center),
+        style = qStylePx(24f, 500, Q.KeyGreen, lh = 1.2f, align = TextAlign.Center),
         maxLines = 1,
         softWrap = false
     )
 }
 
-/** the cross (backspace) icon of the main calculator */
+/** the cross (backspace) icon of the main calculator, in red */
 @Composable
 private fun BackIcon() {
-    SvgIcon(Icons.Backspace, Q.BackGreen, Modifier.size(28.dp))
+    SvgIcon(Icons.Backspace, Q.KeyRed, Modifier.size(28.dp))
 }
