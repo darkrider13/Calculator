@@ -81,6 +81,11 @@ fun PricePage(ctl: PriceController, onBack: () -> Unit, modifier: Modifier = Mod
     }
 
     fun press(key: String) {
+        if (key == "AC") {
+            // AC on the price page clears every input box (units and mode stay)
+            for (id in listOf("rp", "rw", "w", "amt")) ctl.setField(id, "")
+            return
+        }
         val cur = valueOf(active)
         var n = convPress(if (cur.isEmpty()) "0" else cur, key)
         if (n == "0") n = ""

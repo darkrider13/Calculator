@@ -281,24 +281,16 @@ private fun CfmButton(text: String, yes: Boolean, onClick: () -> Unit) {
             .drawBehind {
                 val r = 10.dp.toPx()
                 if (yes) {
-                    drawRoundRect(color = Q.BadBg, cornerRadius = CornerRadius(r))
+                    drawRoundRect(color = Color(0xFFFF0000), cornerRadius = CornerRadius(r))
                 } else {
-                    val bw = density
-                    drawRoundRect(color = Q.Field, cornerRadius = CornerRadius(r))
-                    drawRoundRect(
-                        color = Q.Line,
-                        topLeft = Offset(bw / 2f, bw / 2f),
-                        size = Size(size.width - bw, size.height - bw),
-                        cornerRadius = CornerRadius(r - bw / 2f),
-                        style = Stroke(width = bw)
-                    )
+                    drawRoundRect(color = Color.White, cornerRadius = CornerRadius(r))
                 }
             },
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         BasicText(
             text = text,
-            style = qStyle(0.9f, 600, if (yes) Q.Bad else Q.Ink, align = TextAlign.Center)
+            style = qStyle(0.9f, 700, if (yes) Color.White else Color.Black, align = TextAlign.Center)
         )
     }
 }

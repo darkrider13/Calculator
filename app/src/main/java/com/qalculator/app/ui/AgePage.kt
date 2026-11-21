@@ -59,6 +59,21 @@ private fun dateText(d: String, typed: Color) = buildAnnotatedString {
     }
 }
 
+/** typing check: day 01-31 and month 01-12 only, a digit that would make them invalid is not accepted */
+private fun dateTypingOk(d: String): Boolean {
+    if (d.isNotEmpty() && d[0] > '3') return false
+    if (d.length >= 2) {
+        val day = d.substring(0, 2).toInt()
+        if (day < 1 || day > 31) return false
+    }
+    if (d.length >= 3 && d[2] > '1') return false
+    if (d.length >= 4) {
+        val month = d.substring(2, 4).toInt()
+        if (month < 1 || month > 12) return false
+    }
+    return true
+}
+
 private fun plural(n: Int, one: String) = "$n $one" + if (n == 1) "" else "s"
 
 @Composable
@@ -74,7 +89,7 @@ fun AgePage(onBack: () -> Unit, modifier: Modifier = Modifier) {
         val n = when (k) {
             "AC" -> ""
             "⌫" -> cur.dropLast(1)
-            else -> if (cur.length < 8 && k[0].isDigit()) cur + k else cur
+            else -> if (cur.length < 8 && k[0].isDigit() && dateTypingOk(cur + k)) cur + k else cur
         }
         if (dobActive) dob = n else asOf = n
     }

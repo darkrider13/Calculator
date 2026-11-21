@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -283,12 +284,16 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // green pill, its right edge lines up with the right edge of the "= result" above
                     PressBox(
                         onClick = onUse,
-                        modifier = Modifier.heightIn(min = 32.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp)
+                        modifier = Modifier
+                            .padding(end = 2.dp)
+                            .heightIn(min = 30.dp)
+                            .background(Q.KeyEq, androidx.compose.foundation.shape.RoundedCornerShape(percent = 50)),
+                        contentPadding = PaddingValues(horizontal = 18.dp)
                     ) {
-                        BasicText("Use", style = qStyle(0.85f, 600, Q.KeyGreen))
+                        BasicText("Use", style = qStyle(0.85f, 700, Color.White))
                     }
                 }
             }

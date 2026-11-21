@@ -2,7 +2,10 @@ package com.qalculator.app.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -130,18 +133,24 @@ fun ConvertScreen(
 ) {
     // phone back button / gesture: back to the calculator (off while the price page is open on top)
     BackHandler(enabled = backEnabled) { onBack() }
+    // the grid sits in the middle of the screen (not stuck to the top with a big empty bottom);
+    // on tall phones the rows get a little taller so it fills the space evenly, on short ones it scrolls
+    BoxWithConstraints(modifier = modifier.fillMaxSize().background(Q.Black)) {
+        val rowH = (maxHeight * 0.17f).coerceIn(120.dp, 150.dp)
+        val screenH = maxHeight
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .background(Q.Black)
             .verticalScroll(rememberScrollState())
-            .padding(start = 12.dp, end = 12.dp, top = 40.dp, bottom = 24.dp)
+            .heightIn(min = screenH)
+            .padding(start = 12.dp, end = 12.dp, top = 24.dp, bottom = 40.dp),
+        verticalArrangement = Arrangement.Center
     ) {
         for (rowItems in ConvertOptions.chunked(3)) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 for (opt in rowItems) {
                     Box(modifier = Modifier.weight(1f)) {
-                        ConvertCell(opt) {
+                        ConvertCell(opt, rowH) {
                             if (opt.label == "Price") onPrice()
                             else if (opt.label == "Numeral system" || opt.label == "BMI" || opt.label == "Age") onExtra(opt.label)
                             else Converters.byLabel(opt.label)?.let(onConverter)
@@ -154,17 +163,18 @@ fun ConvertScreen(
             }
         }
     }
+    }
 }
 
 @Composable
-private fun ConvertCell(opt: ConvertOption, onClick: () -> Unit) {
+private fun ConvertCell(opt: ConvertOption, rowH: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
     PressBox(
         onClick = onClick,
         pressedScale = 0.94f,
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier
             .fillMaxWidth()
-            .height(132.dp)
+            .height(rowH)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             SvgIcon(opt.icon, ConvInk, Modifier.size(30.dp))
