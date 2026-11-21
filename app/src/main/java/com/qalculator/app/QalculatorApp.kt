@@ -31,6 +31,7 @@ import com.qalculator.app.ui.ConvertScreen
 import com.qalculator.app.ui.ConverterPage
 import com.qalculator.app.ui.NumeralPage
 import com.qalculator.app.ui.BmiPage
+import com.qalculator.app.ui.AgePage
 import com.qalculator.app.logic.ConvCategory
 import com.qalculator.app.ui.PricePage
 import com.qalculator.app.ui.LocalCompact
@@ -119,6 +120,16 @@ fun QalculatorApp(state: AppState) {
                             }
                             if (extra == "Numeral system") {
                                 NumeralPage(
+                                    onBack = { extra = null },
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .fillMaxHeight()
+                                        .widthIn(max = 460.dp)
+                                        .fillMaxWidth()
+                                )
+                            }
+                            if (extra == "Age") {
+                                AgePage(
                                     onBack = { extra = null },
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
