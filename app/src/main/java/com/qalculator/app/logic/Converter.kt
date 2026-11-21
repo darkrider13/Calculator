@@ -52,6 +52,8 @@ object Converters {
             ConvUnit("mi", "mi", "Mile", 1609.344),
             ConvUnit("yd", "yd", "Yard", 0.9144),
             ConvUnit("ft", "ft", "Foot", 0.3048),
+            // typed / shown as feet and inches (5′ 7″); its factor is the foot, the page does the ft + in text
+            ConvUnit("ftin", "ft + in", "Feet and inches", 0.3048),
             ConvUnit("in", "in", "Inch", 0.0254),
             ConvUnit("nmi", "nmi", "Nautical mile", 1852.0)
         ),
