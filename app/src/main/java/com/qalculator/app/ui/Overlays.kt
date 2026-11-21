@@ -35,6 +35,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -299,6 +301,20 @@ private fun UnitMenu(req: MenuRequest, onClose: () -> Unit) {
     val firstIdx = Math.max(0, Math.min(req.options.indexOfFirst { it.first == req.selected }, n - MenuShown))
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = firstIdx)
     val snap = rememberSnapFlingBehavior(listState)
+    // when the scrolling stops half way through a row, settle on a whole row (the box never shows a cut card)
+    val pitchPx = with(LocalDensity.current) { (MenuRowH + MenuGap).toPx() }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }.collect { moving ->
+            if (!moving) {
+                val off = listState.firstVisibleItemScrollOffset
+                if (off != 0) {
+                    val idx = listState.firstVisibleItemIndex
+                    val t = if (off > pitchPx / 2f) idx + 1 else idx
+                    listState.animateScrollToItem(Math.min(t, Math.max(0, n - MenuShown)))
+                }
+            }
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()

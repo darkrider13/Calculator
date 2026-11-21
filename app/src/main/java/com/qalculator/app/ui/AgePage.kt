@@ -157,8 +157,10 @@ private fun AgeDateRow(
     onSelect: () -> Unit,
     modifier: Modifier
 ) {
+    val copy = rememberCopier()
     PressBox(
         onClick = onSelect,
+        onLongClick = { if (digits.length == 8) copy(dateText(digits, Color.White).text) },
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
@@ -203,16 +205,16 @@ private fun AgeResultView(dobBad: Boolean, onBad: Boolean, dobOk: Boolean, onOk:
         return
     }
     BasicText("Age", style = qStylePx(13f, 300, ConvLabelInk, lh = 1.3f))
-    BasicText(
-        buildAnnotatedString {
-            append(plural(r.years, "year"))
-            append("  ")
-            append(plural(r.months, "month"))
-            append("  ")
-            append(plural(r.days, "day"))
-        },
-        style = qStylePx(28f, 300, Q.KeyGreen, lh = 1.3f)
-    )
+    val ageText = plural(r.years, "year") + "  " + plural(r.months, "month") + "  " + plural(r.days, "day")
+    val copy = rememberCopier()
+    PressBox(
+        onClick = { },
+        onLongClick = { copy(ageText) },
+        contentAlignment = Alignment.CenterStart,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        BasicText(ageText, style = qStylePx(28f, 300, Q.KeyGreen, lh = 1.3f))
+    }
     Spacer(Modifier.height(10.dp))
     val next = if (r.birthdayToday) "Today (${r.nextWeekday})"
     else "in " + plural(r.nextMonths, "month") + " " + plural(r.nextDays, "day") + " (${r.nextWeekday})"

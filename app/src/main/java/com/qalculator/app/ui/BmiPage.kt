@@ -144,7 +144,10 @@ fun BmiPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
             val cls = category
             if (r != null && cls != null) {
                 BasicText("Your BMI", style = qStylePx(14f, 300, ConvLabelInk, lh = 1.3f))
-                BasicText(r, style = qStylePx(48f, 300, cls.color, lh = 1.15f), maxLines = 1)
+                val copy = rememberCopier()
+                PressBox(onClick = { }, onLongClick = { copy(r) }, contentAlignment = Alignment.CenterStart) {
+                    BasicText(r, style = qStylePx(48f, 300, cls.color, lh = 1.15f), maxLines = 1)
+                }
                 BasicText(cls.name, style = qStylePx(18f, 500, cls.color, lh = 1.3f), maxLines = 1)
                 Spacer(Modifier.height(24.dp))
             }

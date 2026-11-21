@@ -1,6 +1,8 @@
 package com.qalculator.app.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +41,7 @@ import androidx.compose.ui.unit.dp
  * A tappable box without the Android ripple. Like CSS :active it can shrink a little while pressed
  * (pressedScale). content gets the pressed state.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PressBox(
     onClick: () -> Unit,
@@ -47,6 +50,7 @@ fun PressBox(
     pressedScale: Float = 1f,
     contentAlignment: Alignment = Alignment.Center,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    onLongClick: (() -> Unit)? = null,
     content: @Composable BoxScope.(Boolean) -> Unit
 ) {
     val source = remember { MutableInteractionSource() }
@@ -59,11 +63,23 @@ fun PressBox(
                 scaleY = s
             }
             .then(modifier)
-            .clickable(
-                interactionSource = source,
-                indication = null,
-                enabled = enabled,
-                onClick = onClick
+            .then(
+                if (onLongClick != null) {
+                    Modifier.combinedClickable(
+                        interactionSource = source,
+                        indication = null,
+                        enabled = enabled,
+                        onLongClick = onLongClick,
+                        onClick = onClick
+                    )
+                } else {
+                    Modifier.clickable(
+                        interactionSource = source,
+                        indication = null,
+                        enabled = enabled,
+                        onClick = onClick
+                    )
+                }
             )
             .padding(contentPadding),
         contentAlignment = contentAlignment

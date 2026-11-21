@@ -28,6 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
+import android.widget.Toast
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -98,7 +104,7 @@ private fun ftInResult(v: Double): String {
 
 /** what the page remembers: the typed number, the two units and which row is being typed in */
 private class ConverterState(val cat: ConvCategory) {
-    var input by mutableStateOf("1")
+    var input by mutableStateOf("0")
     var topUnit by mutableStateOf(cat.defTop)
     var bottomUnit by mutableStateOf(cat.defBottom)
     var topActive by mutableStateOf(true)
@@ -237,6 +243,24 @@ fun ConverterPage(cat: ConvCategory, onBack: () -> Unit, modifier: Modifier = Mo
     }
 }
 
+/** long press on a number copies it: returns the function that puts a text on the clipboard and says "Copied" */
+@Composable
+internal fun rememberCopier(): (String) -> Unit {
+    val clip = LocalClipboardManager.current
+    val ctx = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    return remember(clip, ctx, haptic) {
+        { text: String ->
+            clip.setText(AnnotatedString(text))
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            Toast.makeText(ctx, "Copied", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+/** the number as it is copied: no thousands commas (feet + inches stays as shown) */
+internal fun copyText(shown: String): String = if (shown.contains('′')) shown else shown.replace(",", "")
+
 /** one unit row: the unit button on the left, the number on the right with the unit name under it */
 @Composable
 internal fun ConvRow(
@@ -255,8 +279,10 @@ internal fun ConvRow(
         text.length <= 17 -> 24f
         else -> 20f
     }
+    val copy = rememberCopier()
     PressBox(
         onClick = onSelect,
+        onLongClick = { copy(copyText(text)) },
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 26.dp)
     ) {

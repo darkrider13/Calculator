@@ -293,8 +293,10 @@ private fun PriceRow(
         shown.length <= 14 -> 26f
         else -> 22f
     }
+    val copy = rememberCopier()
     PressBox(
         onClick = onSelect,
+        onLongClick = { copy(copyText(shown)) },
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 2.dp)
@@ -341,10 +343,14 @@ private fun ResultRow(v: com.qalculator.app.logic.MemoView, modifier: Modifier) 
             }
         }
     }
+    val copy = rememberCopier()
+    PressBox(
+        onClick = { },
+        onLongClick = { copy(copyText(v.main)) },
+        modifier = modifier.fillMaxWidth().padding(horizontal = 26.dp)
+    ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 26.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.End
     ) {
@@ -372,5 +378,6 @@ private fun ResultRow(v: com.qalculator.app.logic.MemoView, modifier: Modifier) 
                 overflow = TextOverflow.Ellipsis
             )
         }
+    }
     }
 }
