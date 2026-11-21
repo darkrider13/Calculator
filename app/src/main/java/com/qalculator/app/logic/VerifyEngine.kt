@@ -95,12 +95,12 @@ fun vRender(s0: VState): Pair<VState, VView> {
         var run = 0.0
         for (k in 0..i) run += vals[k]
         run = round8(run)
-        tot.add(VTotLine("এ পর্যন্ত যোগফল: ", numE(run, 6), false))
-        tot.add(VTotLine("মোট: ", numE(all, 6), false))
+        tot.add(VTotLine("Sum so far: ", numE(run, 6), false))
+        tot.add(VTotLine("Total: ", numE(all, 6), false))
     } else {
-        tot.add(VTotLine("মোট ফলাফল: ", numE(all, 6), false))
+        tot.add(VTotLine("Total result: ", numE(all, 6), false))
     }
-    if (s.done.count { it } == n) tot.add(VTotLine("✓ সব সংখ্যা দেখা শেষ, সব মিলেছে", null, true))
+    if (s.done.count { it } == n) tot.add(VTotLine("✓ All numbers checked, everything matches", null, true))
     val expr = ArrayList<VPiece>(vExprPieces(s.src, i, s.done))
     expr.add(VPiece.Txt(" = " + numE(all, 6)))
     val view = VView(

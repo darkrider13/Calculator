@@ -143,11 +143,11 @@ fun money(n: Double): String {
     if (!n.isFinite()) return "—"
     val r = r2(n)
     val isInt = r.isFinite() && Math.floor(r) == r
-    return if (isInt) formatNumber(r, 0, 0, true, true) else formatNumber(r, 2, 2, true, true)
+    return if (isInt) formatNumber(r, 0, 0, true, false) else formatNumber(r, 2, 2, true, false)
 }
 
 /** numf(): Bengali digits, up to d decimals */
-fun numf(n: Double, d: Int): String = if (n.isFinite()) formatNumber(n, 0, d, true, true) else "—"
+fun numf(n: Double, d: Int): String = if (n.isFinite()) formatNumber(n, 0, d, true, false) else "—"
 
 /** numE(): English digits, Indian grouping, up to d decimals */
 fun numE(n: Double, d: Int): String = if (n.isFinite()) formatNumber(n, 0, d, true, false) else "—"
@@ -172,7 +172,10 @@ fun baseParts(g: Double, d: Char): Pair<String, String> {
 
 fun qty(v: Double, u: String?): String = numf(v, 3) + " " + unitOf(u).n
 
-val BN_MON = listOf("জানু", "ফেব্রু", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টে", "অক্টো", "নভে", "ডিসে")
+val BN_MON = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+/** the money sign after an amount (English app: "Tk" instead of the Bengali taka sign) */
+const val TAKA_SUF = " Tk"
 
 /** e.g. "১৬ নভে, ০৭:৫৪ পিএম" (en = true: English digits) */
 fun whenLabel(ts: Long, en: Boolean = false): String {
@@ -180,10 +183,10 @@ fun whenLabel(ts: Long, en: Boolean = false): String {
     c.timeInMillis = ts
     var h = c.get(java.util.Calendar.HOUR_OF_DAY)
     val m = c.get(java.util.Calendar.MINUTE)
-    val ap = if (h >= 12) "পিএম" else "এএম"
+    val ap = if (h >= 12) "PM" else "AM"
     h %= 12
     if (h == 0) h = 12
-    fun bd(n: String): String = if (en) n else bnDigits(n)
+    fun bd(n: String): String = n
     val mm = if (m < 10) "0$m" else "$m"
     return bd(c.get(java.util.Calendar.DAY_OF_MONTH).toString()) + " " + BN_MON[c.get(java.util.Calendar.MONTH)] +
         ", " + bd(h.toString()) + ":" + bd(mm) + " " + ap

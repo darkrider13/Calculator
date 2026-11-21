@@ -198,12 +198,12 @@ sealed class SaveResult {
     /** same as the newest saved entry: show "এটা আগেই সেভ করা আছে" */
     object Duplicate : SaveResult()
 
-    /** saved: show "সেভ হয়েছে ✓" */
+    /** saved: show "Saved ✓" */
     data class Saved(val history: List<HistEntry>) : SaveResult()
 }
 
-const val FLASH_SAVED = "সেভ হয়েছে ✓"
-const val FLASH_DUPLICATE = "এটা আগেই সেভ করা আছে"
+const val FLASH_SAVED = "Saved ✓"
+const val FLASH_DUPLICATE = "Already saved"
 
 /** sig(): the entry without id and time */
 private fun sameEntry(a: HistEntry, b: HistEntry): Boolean = a.copy(id = "", ts = 0L) == b.copy(id = "", ts = 0L)

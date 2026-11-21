@@ -37,8 +37,8 @@ data class CalcState(
 
 class PressResult(val state: CalcState, val entry: CalcEntry? = null)
 
-const val ERR_DIV = "ভাগ করা যায় না"
-const val ERR_DOM = "ভুল ইনপুট"
+const val ERR_DIV = "Can't divide"
+const val ERR_DOM = "Invalid input"
 
 /** the keys: label, key code, class, (aria label is not needed) */
 class KeyDef(val label: String, val k: String, val cls: String)

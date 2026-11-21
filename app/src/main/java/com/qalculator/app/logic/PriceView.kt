@@ -20,7 +20,7 @@ fun memoOf(f: Form): MemoView {
     val c = compute(f.rp, f.rw, f.ru, f.w, f.wu, f.amt)
     val q = f.m == "p"
     val item = f.item.trim()
-    val label = if (q) "পাবেন" else "মোট দাম"
+    val label = if (q) "You get" else "Total price"
     var sub = ""
     val ok = if (q) c.rateOk && c.amtOk else c.rateOk && c.weightOk
     val main: String
@@ -31,7 +31,7 @@ fun memoOf(f: Form): MemoView {
         val bp = baseParts(c.grams, dimOf(f.ru))
         main = bp.first
         small = bp.second
-        detail = (if (item != "") "$item · " else "") + money(c.amt) + "৳"
+        detail = (if (item != "") "$item · " else "") + money(c.amt) + TAKA_SUF
     } else if (ok) {
         main = money(c.total)
         cur = true
@@ -41,13 +41,13 @@ fun memoOf(f: Form): MemoView {
         else if (c.wG >= 1000) sub = qty(c.wv, bs.u) + " = " + numf(c.wG / 1000, 3) + " " + bs.big
     } else {
         if (q) {
-            main = "০.০"
+            main = "0.0"
             small = baseOf(dimOf(f.ru)).n
         } else {
-            main = "০.০০"
+            main = "0.00"
             cur = true
         }
-        detail = if (!c.rateOk) "আগে দোকানের রেট লিখুন" else if (q) "কত টাকার কিনবেন, সেটা লিখুন" else "কত পরিমাণ কিনছেন, সেটা লিখুন"
+        detail = if (!c.rateOk) "Enter the shop rate first" else if (q) "Enter how much money you will spend" else "Enter how much you are buying"
     }
     return MemoView(label, main, cur, small, detail, sub, ok)
 }
