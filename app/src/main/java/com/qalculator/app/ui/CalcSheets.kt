@@ -206,13 +206,17 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit) {
         }
     } else base
     Box(modifier = m.padding(start = 10.dp, end = 4.dp, top = 8.dp, bottom = 8.dp), contentAlignment = Alignment.CenterStart) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val maxR = maxWidth * 0.55f
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.Top
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val maxR = maxWidth * 0.55f
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                // left: expression on top, date below
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
                     BasicText(
                         text = dispExpr(e.expr),
@@ -220,40 +224,29 @@ private fun CalcItem(e: CalcEntry, onOpen: () -> Unit, onUse: () -> Unit) {
                         maxLines = 1,
                         softWrap = false,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 2.dp)
+                        modifier = Modifier.padding(horizontal = 2.dp)
                     )
+                    BasicText(
+                        text = whenLabel(e.ts, true),
+                        style = qStyle(0.74f, 400, Q.Muted),
+                        modifier = Modifier.padding(horizontal = 2.dp)
+                    )
+                }
+                // right: "= result" always centered right above the Use pill
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.widthIn(max = maxR)
+                ) {
                     BasicText(
                         text = "= " + numE(e.result, 6),
                         style = qStyle(0.95f, 700, Q.KeyGreen, tnum = true),
                         maxLines = 1,
-                        softWrap = false,
-                        modifier = Modifier
-                            .widthIn(max = maxR)
-                            .padding(horizontal = 2.dp)
+                        softWrap = false
                     )
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BasicText(
-                    text = whenLabel(e.ts, true),
-                    style = qStyle(0.74f, 400, Q.Muted),
-                    modifier = Modifier.padding(horizontal = 2.dp)
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // green pill, its right edge lines up with the right edge of the "= result" above
                     PressBox(
                         onClick = onUse,
                         modifier = Modifier
-                            .padding(end = 2.dp)
                             .heightIn(min = 24.dp)
                             .background(Q.KeyEq, androidx.compose.foundation.shape.RoundedCornerShape(percent = 50)),
                         contentPadding = PaddingValues(horizontal = 12.dp)
