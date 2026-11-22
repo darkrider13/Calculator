@@ -288,14 +288,15 @@ private fun CfmButton(text: String, yes: Boolean, green: Boolean = false, onClic
                 if (yes) {
                     drawRoundRect(color = if (green) Q.KeyEq else Color(0xFFFF0000), cornerRadius = CornerRadius(r))
                 } else {
-                    drawRoundRect(color = Color.White, cornerRadius = CornerRadius(r))
+                    // "No" / cancel is the safe choice -> green
+                    drawRoundRect(color = Q.KeyEq, cornerRadius = CornerRadius(r))
                 }
             },
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         BasicText(
             text = text,
-            style = qStyle(0.9f, 700, if (yes) Color.White else Color.Black, align = TextAlign.Center)
+            style = qStyle(0.9f, 700, Color.White, align = TextAlign.Center)
         )
     }
 }
